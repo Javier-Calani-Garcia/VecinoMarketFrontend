@@ -3,8 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ShoppingCart, Search, Menu as MenuIcon, X } from 'lucide-react';
 import * as Icons from 'lucide-react';
 import { useCart } from '../../context/CartContext';
+import { useCatalogo } from '../../context/CatalogoContext';
 import { useTheme } from '../../context/ThemeContext';
-import { categorias } from '../../data/categories';
 import ExploreMenu from './ExploreMenu';
 import DepartamentoMenu from './DepartamentoMenu';
 import AccountMenu from './AccountMenu';
@@ -16,6 +16,7 @@ export default function Header() {
   const [logoError, setLogoError] = useState(false);
   const [logoOscuroError, setLogoOscuroError] = useState(false);
   const { totalItems } = useCart();
+  const { categorias } = useCatalogo();
   const { tema } = useTheme();
   const navigate = useNavigate();
 

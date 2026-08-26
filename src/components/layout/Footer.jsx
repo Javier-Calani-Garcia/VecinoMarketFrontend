@@ -1,7 +1,9 @@
 import { Link } from 'react-router-dom';
-import { categorias } from '../../data/categories';
+import { useCatalogo } from '../../context/CatalogoContext';
 
 export default function Footer() {
+  const { categorias } = useCatalogo();
+
   return (
     <footer className="mt-16 bg-gray-900 text-gray-300">
       <div className="mx-auto max-w-7xl px-4 py-10 grid grid-cols-2 sm:grid-cols-4 gap-8 text-sm">

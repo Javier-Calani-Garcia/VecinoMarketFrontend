@@ -2,9 +2,11 @@ import { Link } from 'react-router-dom';
 import { Menu, ChevronDown } from 'lucide-react';
 import * as Icons from 'lucide-react';
 import Dropdown from '../ui/Dropdown';
-import { categorias } from '../../data/categories';
+import { useCatalogo } from '../../context/CatalogoContext';
 
 export default function ExploreMenu() {
+  const { categorias } = useCatalogo();
+
   return (
     <Dropdown
       align="left"

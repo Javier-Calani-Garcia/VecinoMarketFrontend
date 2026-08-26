@@ -5,6 +5,7 @@ import './index.css'
 import App from './App.jsx'
 import { AuthProvider } from './context/AuthContext.jsx'
 import { CartProvider } from './context/CartContext.jsx'
+import { CatalogoProvider } from './context/CatalogoContext.jsx'
 import { LocationProvider } from './context/LocationContext.jsx'
 import { ThemeProvider } from './context/ThemeContext.jsx'
 
@@ -14,9 +15,11 @@ createRoot(document.getElementById('root')).render(
       <ThemeProvider>
         <AuthProvider>
           <CartProvider>
-            <LocationProvider>
-              <App />
-            </LocationProvider>
+            <CatalogoProvider>
+              <LocationProvider>
+                <App />
+              </LocationProvider>
+            </CatalogoProvider>
           </CartProvider>
         </AuthProvider>
       </ThemeProvider>

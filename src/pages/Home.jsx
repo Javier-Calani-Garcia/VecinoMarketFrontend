@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import * as Icons from 'lucide-react';
-import { categorias } from '../data/categories';
-import { productosDestacados, productosEnOferta } from '../data/products';
+import { obtenerProductos } from '../api/catalogo';
+import { useCatalogo } from '../context/CatalogoContext';
 import ProductCard from '../components/product/ProductCard';
 
 const ICONOS_FLOTANTES = [
@@ -15,9 +15,19 @@ const ICONOS_FLOTANTES = [
 ];
 
 export default function Home() {
-  const destacados = productosDestacados(8);
-  const ofertas = productosEnOferta(8);
+  const { categorias } = useCatalogo();
+  const [productos, setProductos] = useState([]);
   const [bannerError, setBannerError] = useState(false);
+
+  useEffect(() => {
+    obtenerProductos().then(setProductos).catch(() => setProductos([]));
+  }, []);
+
+  // El backend ya ordena por más reciente primero, así que los primeros N ya
+  // sirven como "recién agregados"; no hay valoración por producto en el
+  // modelo real, así que ya no hay un criterio de "mejor valorado" posible.
+  const recienAgregados = productos.slice(0, 8);
+  const ofertas = productos.filter((p) => p.precio_descuento).slice(0, 8);
 
   return (
     <div>
@@ -114,16 +124,16 @@ export default function Home() {
         </section>
       )}
 
-      {/* Destacados */}
+      {/* Recién agregados */}
       <section className="mx-auto max-w-7xl px-4 py-6 mb-10">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Mejor valorados</h2>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Recién agregados</h2>
           <Link to="/productos" className="text-sm font-medium text-brand-600 dark:text-brand-400 hover:underline">
             Ver todo
           </Link>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-          {destacados.map((p) => (
+          {recienAgregados.map((p) => (
             <ProductCard key={p.id} producto={p} />
           ))}
         </div>

@@ -1,18 +1,40 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, Link, Navigate } from 'react-router-dom';
 import { ShoppingCart, Minus, Plus, Store, Truck, ShieldCheck } from 'lucide-react';
-import { obtenerProducto } from '../data/products';
-import { categorias } from '../data/categories';
+import { obtenerProducto } from '../api/catalogo';
+import { useCatalogo } from '../context/CatalogoContext';
 import StarRating from '../components/product/StarRating';
 import { useCart } from '../context/CartContext';
 
 export default function ProductDetail() {
   const { id } = useParams();
-  const producto = obtenerProducto(id);
+  const { categorias } = useCatalogo();
+  const [producto, setProducto] = useState(null);
+  const [cargando, setCargando] = useState(true);
+  const [noEncontrado, setNoEncontrado] = useState(false);
   const [cantidad, setCantidad] = useState(1);
   const { agregarAlCarrito } = useCart();
 
-  if (!producto) return <Navigate to="/productos" replace />;
+  // Igual que en ProductListing: si cambia el id (navegar de un producto a
+  // otro), se resetea el estado durante el render, no en el efecto.
+  const [idAnterior, setIdAnterior] = useState(id);
+  if (idAnterior !== id) {
+    setIdAnterior(id);
+    setCargando(true);
+    setNoEncontrado(false);
+  }
+
+  useEffect(() => {
+    obtenerProducto(id)
+      .then(setProducto)
+      .catch(() => setNoEncontrado(true))
+      .finally(() => setCargando(false));
+  }, [id]);
+
+  if (noEncontrado) return <Navigate to="/productos" replace />;
+  if (cargando || !producto) {
+    return <div className="mx-auto max-w-7xl px-4 py-16 text-center text-gray-500 dark:text-gray-400">Cargando...</div>;
+  }
 
   const categoria = categorias.find((c) => c.id === producto.categoriaId);
   const tieneDescuento = Boolean(producto.precio_descuento);
