@@ -7,4 +7,12 @@ const API = axios.create({
   },
 });
 
+API.interceptors.request.use((config) => {
+  const access = localStorage.getItem('vecinomarket_access');
+  if (access) {
+    config.headers.Authorization = `Bearer ${access}`;
+  }
+  return config;
+});
+
 export default API;
