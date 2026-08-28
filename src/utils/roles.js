@@ -15,3 +15,7 @@ export function esSuperAdmin(usuario) {
 export function esEmpresaOEmpleado(usuario) {
   return !!usuario && (usuario.rol === 'EMPRESA' || usuario.rol === 'EMPLEADO');
 }
+
+export function esComprador(usuario) {
+  return !!usuario && usuario.rol === 'COMPRADOR';
+}

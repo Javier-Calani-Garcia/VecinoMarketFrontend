@@ -1,9 +1,9 @@
 import { Link } from 'react-router-dom';
-import { User, LogOut, ChevronDown, Wallet } from 'lucide-react';
+import { User, LogOut, ChevronDown, Wallet, ClipboardList, Truck, MapPin, Receipt } from 'lucide-react';
 import Dropdown from '../ui/Dropdown';
 import AdminMenu from './AdminMenu';
 import { useAuth } from '../../context/AuthContext';
-import { esStaff, esEmpresaOEmpleado } from '../../utils/roles';
+import { esStaff, esEmpresaOEmpleado, esComprador } from '../../utils/roles';
 
 export default function AccountMenu() {
   const { usuario, logout } = useAuth();
@@ -27,9 +27,30 @@ export default function AccountMenu() {
           <div className="px-4 py-1.5 text-xs text-gray-400 dark:text-gray-500">Hola, {usuario.nombre}</div>
           <Link to="/perfil" className="block px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700">Mi perfil</Link>
           {esEmpresaOEmpleado(usuario) && (
-            <Link to="/mi-empresa/metodos-pago" className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700">
-              <Wallet size={16} /> Métodos de pago
-            </Link>
+            <>
+              <Link to="/mi-empresa/pedidos" className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700">
+                <ClipboardList size={16} /> Pedidos y ventas
+              </Link>
+              <Link to="/mi-empresa/entregas" className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700">
+                <Truck size={16} /> Entregas
+              </Link>
+              <Link to="/mi-empresa/metodos-pago" className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700">
+                <Wallet size={16} /> Métodos de pago
+              </Link>
+              <Link to="/mi-empresa/facturas" className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700">
+                <Receipt size={16} /> Facturas
+              </Link>
+            </>
+          )}
+          {esComprador(usuario) && (
+            <>
+              <Link to="/mis-direcciones" className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700">
+                <MapPin size={16} /> Mis direcciones
+              </Link>
+              <Link to="/mis-compras" className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700">
+                <Receipt size={16} /> Mis compras
+              </Link>
+            </>
           )}
           {esStaff(usuario) && (
             <>

@@ -19,6 +19,16 @@ import Productos from './pages/admin/Productos';
 import CatalogosEmpresas from './pages/admin/CatalogosEmpresas';
 import MetodosPagoEmpresas from './pages/admin/MetodosPagoEmpresas';
 import MisMetodosPago from './pages/empresa/MisMetodosPago';
+import InventarioEmpresas from './pages/admin/InventarioEmpresas';
+import Carritos from './pages/admin/Carritos';
+import PedidosVentas from './pages/admin/PedidosVentas';
+import MisPedidos from './pages/empresa/MisPedidos';
+import Entregas from './pages/admin/Entregas';
+import MisEntregas from './pages/empresa/MisEntregas';
+import MisDirecciones from './pages/MisDirecciones';
+import Facturacion from './pages/admin/Facturacion';
+import MisFacturas from './pages/empresa/MisFacturas';
+import MisCompras from './pages/MisCompras';
 import RolesBase from './pages/admin/RolesBase';
 import CambiarRoles from './pages/admin/CambiarRoles';
 import EnConstruccion from './pages/admin/EnConstruccion';
@@ -51,6 +61,16 @@ function App() {
         <Route path="/admin/catalogo" element={<CatalogosEmpresas />} />
         <Route path="/admin/metodos-pago" element={<MetodosPagoEmpresas />} />
         <Route path="/mi-empresa/metodos-pago" element={<MisMetodosPago />} />
+        <Route path="/admin/inventario" element={<InventarioEmpresas />} />
+        <Route path="/admin/carritos" element={<Carritos />} />
+        <Route path="/admin/pedidos" element={<PedidosVentas />} />
+        <Route path="/mi-empresa/pedidos" element={<MisPedidos />} />
+        <Route path="/admin/entregas" element={<Entregas />} />
+        <Route path="/mi-empresa/entregas" element={<MisEntregas />} />
+        <Route path="/mis-direcciones" element={<MisDirecciones />} />
+        <Route path="/admin/facturacion" element={<Facturacion />} />
+        <Route path="/mi-empresa/facturas" element={<MisFacturas />} />
+        <Route path="/mis-compras" element={<MisCompras />} />
         <Route path="/admin/roles" element={<RolesBase />} />
         <Route path="/admin/cambiar-roles" element={<CambiarRoles />} />
         {rutasAdminPendientes.map((item) => (
