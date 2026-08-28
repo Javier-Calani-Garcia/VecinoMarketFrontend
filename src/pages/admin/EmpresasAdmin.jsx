@@ -3,6 +3,7 @@ import { Navigate } from 'react-router-dom';
 import { Building2, ChevronLeft, ChevronRight, Ban, RotateCcw, Search, Check, X, CreditCard, Pencil } from 'lucide-react';
 import API from '../../api/axios';
 import { useAuth } from '../../context/AuthContext';
+import { esStaff } from '../../utils/roles';
 
 const ESTADOS = [
   { value: '', label: 'Todos los estados' },
@@ -106,7 +107,7 @@ export default function EmpresasAdmin() {
   }
 
   useEffect(() => {
-    if (!usuario || usuario.rol !== 'ADMIN' || tab !== 'empresas') return;
+    if (!usuario || !esStaff(usuario) || tab !== 'empresas') return;
     cargarEmpresas();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [usuario, tab, pagina, estado, estadoSuscripcion, busqueda]);
@@ -121,14 +122,14 @@ export default function EmpresasAdmin() {
   }
 
   useEffect(() => {
-    if (!usuario || usuario.rol !== 'ADMIN' || tab !== 'solicitudes') return;
+    if (!usuario || !esStaff(usuario) || tab !== 'solicitudes') return;
     cargarSolicitudes();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [usuario, tab]);
 
   if (cargandoAuth) return null;
   if (!usuario) return <Navigate to="/login?next=/admin/empresas" replace />;
-  if (usuario.rol !== 'ADMIN') return <Navigate to="/" replace />;
+  if (!esStaff(usuario)) return <Navigate to="/" replace />;
 
   async function toggleEstado(empresa) {
     setAccionando(empresa.id);

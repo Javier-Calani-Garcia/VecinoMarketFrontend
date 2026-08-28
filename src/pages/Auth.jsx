@@ -46,8 +46,11 @@ export default function Auth() {
   }
 
   function irSegunRol(perfil) {
-    // CU22: el ADMIN de la plataforma entra directo a la bitácora.
-    navigate(perfil.rol === 'ADMIN' ? '/bitacora' : next);
+    // CU22: el SUPERADMIN entra directo a la bitácora. El ADMIN de soporte
+    // no tiene acceso a la bitácora, así que va a la gestión de usuarios.
+    if (perfil.rol === 'SUPERADMIN') navigate('/bitacora');
+    else if (perfil.rol === 'ADMIN') navigate('/admin/usuarios');
+    else navigate(next);
   }
 
   async function onSubmitLogin(e) {

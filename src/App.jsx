@@ -14,7 +14,10 @@ import Bitacora from './pages/Bitacora';
 import Usuarios from './pages/admin/Usuarios';
 import EmpresasAdmin from './pages/admin/EmpresasAdmin';
 import Empleados from './pages/admin/Empleados';
+import Categorias from './pages/admin/Categorias';
+import Productos from './pages/admin/Productos';
 import RolesBase from './pages/admin/RolesBase';
+import CambiarRoles from './pages/admin/CambiarRoles';
 import EnConstruccion from './pages/admin/EnConstruccion';
 import NotFound from './pages/NotFound';
 import { GRUPOS_ADMIN } from './config/adminMenu';
@@ -40,7 +43,10 @@ function App() {
         <Route path="/admin/usuarios" element={<Usuarios />} />
         <Route path="/admin/empresas" element={<EmpresasAdmin />} />
         <Route path="/admin/empleados" element={<Empleados />} />
+        <Route path="/admin/categorias" element={<Categorias />} />
+        <Route path="/admin/productos" element={<Productos />} />
         <Route path="/admin/roles" element={<RolesBase />} />
+        <Route path="/admin/cambiar-roles" element={<CambiarRoles />} />
         {rutasAdminPendientes.map((item) => (
           <Route
             key={item.cu}

@@ -3,6 +3,7 @@ import { User, LogOut, ChevronDown } from 'lucide-react';
 import Dropdown from '../ui/Dropdown';
 import AdminMenu from './AdminMenu';
 import { useAuth } from '../../context/AuthContext';
+import { esStaff } from '../../utils/roles';
 
 export default function AccountMenu() {
   const { usuario, logout } = useAuth();
@@ -12,7 +13,7 @@ export default function AccountMenu() {
       align="right"
       triggerClassName="rounded-full px-2 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
       panelPositionClassName="fixed inset-x-3 top-16 sm:absolute sm:inset-x-auto sm:top-auto sm:right-0 sm:mt-2"
-      panelClassName={`${usuario?.rol === 'ADMIN' ? 'sm:w-80' : 'sm:w-56'} rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 py-2 shadow-lg text-sm text-gray-700 dark:text-gray-200 max-h-[80vh] overflow-y-auto`}
+      panelClassName={`${esStaff(usuario) ? 'sm:w-80' : 'sm:w-56'} rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 py-2 shadow-lg text-sm text-gray-700 dark:text-gray-200 max-h-[80vh] overflow-y-auto`}
       trigger={
         <>
           <User size={20} />
@@ -25,7 +26,7 @@ export default function AccountMenu() {
         <>
           <div className="px-4 py-1.5 text-xs text-gray-400 dark:text-gray-500">Hola, {usuario.nombre}</div>
           <Link to="/perfil" className="block px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700">Mi perfil</Link>
-          {usuario.rol === 'ADMIN' && (
+          {esStaff(usuario) && (
             <>
               <div className="my-1 border-t border-gray-100 dark:border-gray-700" />
               <AdminMenu />

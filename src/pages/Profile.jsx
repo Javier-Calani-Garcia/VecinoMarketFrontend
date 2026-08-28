@@ -4,6 +4,7 @@ import { LogOut, Store, Pencil, X, Check } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import API from '../api/axios';
 import PasswordInput from '../components/ui/PasswordInput';
+import { esStaff } from '../utils/roles';
 
 const inputClass = 'w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-300';
 const labelClass = 'block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1';
@@ -23,7 +24,7 @@ export default function Profile() {
   if (cargando) return null;
   if (!usuario) return <Navigate to="/login?next=/perfil" replace />;
 
-  const esAdmin = usuario.rol === 'ADMIN';
+  const esAdmin = esStaff(usuario);
 
   function iniciarEdicion() {
     setForm({

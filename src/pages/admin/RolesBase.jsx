@@ -3,6 +3,7 @@ import { Navigate } from 'react-router-dom';
 import { ShieldCheck, Plus, Trash2 } from 'lucide-react';
 import API from '../../api/axios';
 import { useAuth } from '../../context/AuthContext';
+import { esSuperAdmin } from '../../utils/roles';
 
 export default function RolesBase() {
   const { usuario, cargando: cargandoAuth } = useAuth();
@@ -23,13 +24,13 @@ export default function RolesBase() {
   }
 
   useEffect(() => {
-    if (!usuario || usuario.rol !== 'ADMIN') return;
+    if (!usuario || !esSuperAdmin(usuario)) return;
     cargar();
   }, [usuario]);
 
   if (cargandoAuth) return null;
   if (!usuario) return <Navigate to="/login?next=/admin/roles" replace />;
-  if (usuario.rol !== 'ADMIN') return <Navigate to="/" replace />;
+  if (!esSuperAdmin(usuario)) return <Navigate to="/" replace />;
 
   async function crearRol(e) {
     e.preventDefault();

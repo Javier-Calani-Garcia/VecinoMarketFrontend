@@ -3,12 +3,14 @@ import { Navigate } from 'react-router-dom';
 import { Users, ChevronLeft, ChevronRight, Lock, Unlock, Search, UserPlus, Pencil } from 'lucide-react';
 import API from '../../api/axios';
 import { useAuth } from '../../context/AuthContext';
+import { esStaff, esSuperAdmin } from '../../utils/roles';
 
 const NUEVO_USUARIO_VACIO = { nombre: '', apellido: '', email: '', telefono: '', password: '' };
 
 const ROLES = [
   { value: '', label: 'Todos los roles' },
-  { value: 'ADMIN', label: 'Admin' },
+  { value: 'SUPERADMIN', label: 'Superadmin' },
+  { value: 'ADMIN', label: 'Admin (soporte)' },
   { value: 'EMPRESA', label: 'Empresa' },
   { value: 'EMPLEADO', label: 'Empleado' },
   { value: 'COMPRADOR', label: 'Comprador' },
@@ -62,14 +64,14 @@ export default function Usuarios() {
   }
 
   useEffect(() => {
-    if (!usuario || usuario.rol !== 'ADMIN') return;
+    if (!usuario || !esStaff(usuario)) return;
     cargarUsuarios();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [usuario, pagina, rol, estado, busqueda]);
 
   if (cargandoAuth) return null;
   if (!usuario) return <Navigate to="/login?next=/admin/usuarios" replace />;
-  if (usuario.rol !== 'ADMIN') return <Navigate to="/" replace />;
+  if (!esStaff(usuario)) return <Navigate to="/" replace />;
 
   async function toggleBloqueo(u) {
     setAccionando(u.id);
@@ -134,16 +136,16 @@ export default function Usuarios() {
     setGuardandoEdicion(true);
     setErrorEdicion('');
     try {
-      const { password_nueva, ...datos } = datosEdicion;
+      const { password_nueva, rol: _rol, ...datos } = datosEdicion;
       await API.patch(`usuarios/${usuarioEditando.id}/editar/`, datos);
-      if (password_nueva) {
+      if (password_nueva && esSuperAdmin(usuario)) {
         await API.post(`usuarios/${usuarioEditando.id}/restablecer-password/`, { password_nueva });
       }
       setUsuarioEditando(null);
       await cargarUsuarios();
     } catch (err) {
       const data = err?.response?.data || {};
-      setErrorEdicion(data.email?.[0] || data.password_nueva?.[0] || 'No se pudo guardar los cambios.');
+      setErrorEdicion(data.detail || data.email?.[0] || data.password_nueva?.[0] || 'No se pudo guardar los cambios.');
     } finally {
       setGuardandoEdicion(false);
     }
@@ -382,30 +384,29 @@ export default function Usuarios() {
                 placeholder="Teléfono"
                 className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-300"
               />
-              <div className="grid grid-cols-2 gap-2">
-                <select
-                  value={datosEdicion.rol}
-                  onChange={(e) => setDatosEdicion((prev) => ({ ...prev, rol: e.target.value }))}
-                  className="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-300"
-                >
-                  {ROLES.filter((op) => op.value).map((op) => <option key={op.value} value={op.value}>{op.label}</option>)}
-                </select>
+              <div>
+                <label className="block text-xs text-gray-400 dark:text-gray-500 mb-1">
+                  Rol: <span className="font-medium text-gray-600 dark:text-gray-300">{datosEdicion.rol}</span>
+                  {' '}(para cambiarlo, usa "Administrar roles")
+                </label>
                 <select
                   value={datosEdicion.estado}
                   onChange={(e) => setDatosEdicion((prev) => ({ ...prev, estado: e.target.value }))}
-                  className="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-300"
+                  className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-300"
                 >
                   {ESTADOS.filter((op) => op.value).map((op) => <option key={op.value} value={op.value}>{op.label}</option>)}
                 </select>
               </div>
-              <input
-                type="password"
-                minLength={8}
-                value={datosEdicion.password_nueva}
-                onChange={(e) => setDatosEdicion((prev) => ({ ...prev, password_nueva: e.target.value }))}
-                placeholder="Nueva contraseña (opcional, mínimo 8 caracteres)"
-                className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-300"
-              />
+              {esSuperAdmin(usuario) && (
+                <input
+                  type="password"
+                  minLength={8}
+                  value={datosEdicion.password_nueva}
+                  onChange={(e) => setDatosEdicion((prev) => ({ ...prev, password_nueva: e.target.value }))}
+                  placeholder="Nueva contraseña (opcional, mínimo 8 caracteres)"
+                  className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-300"
+                />
+              )}
             </div>
 
             {errorEdicion && <p className="text-xs text-red-600 dark:text-red-400 mt-3">{errorEdicion}</p>}

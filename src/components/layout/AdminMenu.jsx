@@ -2,13 +2,19 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
 import { GRUPOS_ADMIN } from '../../config/adminMenu';
+import { useAuth } from '../../context/AuthContext';
+import { esSuperAdmin } from '../../utils/roles';
 
 export default function AdminMenu() {
   const [abierto, setAbierto] = useState(null);
+  const { usuario } = useAuth();
+  const esSuper = esSuperAdmin(usuario);
 
   return (
     <div className="py-1">
       {GRUPOS_ADMIN.map((grupo, i) => {
+        const items = grupo.items.filter((item) => esSuper || !item.soloSuperAdmin);
+        if (items.length === 0) return null;
         const expandido = abierto === grupo.id;
         return (
           <div key={grupo.id} onMouseEnter={() => setAbierto(grupo.id)}>
@@ -27,7 +33,7 @@ export default function AdminMenu() {
             </button>
             {expandido && (
               <div className="bg-gray-50 dark:bg-gray-900/40 py-1">
-                {grupo.items.map((item) => (
+                {items.map((item) => (
                   <Link
                     key={item.cu}
                     to={item.to}

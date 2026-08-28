@@ -1,13 +1,14 @@
 import { Navigate } from 'react-router-dom';
 import { Construction } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { esStaff } from '../../utils/roles';
 
 export default function EnConstruccion({ cu, titulo, descripcion }) {
   const { usuario, cargando: cargandoAuth } = useAuth();
 
   if (cargandoAuth) return null;
   if (!usuario) return <Navigate to="/login" replace />;
-  if (usuario.rol !== 'ADMIN') return <Navigate to="/" replace />;
+  if (!esStaff(usuario)) return <Navigate to="/" replace />;
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8">

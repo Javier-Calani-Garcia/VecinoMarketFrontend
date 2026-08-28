@@ -33,9 +33,10 @@ export const GRUPOS_ADMIN = [
       },
       {
         cu: 'CU24',
-        titulo: 'Administrar Roles y Permisos',
-        to: '/admin/roles',
+        titulo: 'Administrar Roles',
+        to: '/admin/cambiar-roles',
         implementado: true,
+        soloSuperAdmin: true,
       },
     ],
   },
@@ -47,13 +48,13 @@ export const GRUPOS_ADMIN = [
         cu: 'CU06',
         titulo: 'Gestionar Categorías de Productos',
         to: '/admin/categorias',
-        descripcion: 'Crear, editar y eliminar categorías, y ver qué productos están dentro de cada una.',
+        implementado: true,
       },
       {
         cu: 'CU07',
         titulo: 'Gestionar Productos',
         to: '/admin/productos',
-        descripcion: 'Registrar, editar y eliminar productos, y ver los productos que registraron las empresas.',
+        implementado: true,
       },
       {
         cu: 'CU08',
@@ -189,6 +190,7 @@ export const GRUPOS_ADMIN = [
         titulo: 'Consultar Logs de Auditoría del Sistema',
         to: '/bitacora',
         implementado: true,
+        soloSuperAdmin: true,
       },
       {
         cu: 'CU23',

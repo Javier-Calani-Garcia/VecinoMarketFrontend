@@ -3,6 +3,7 @@ import { Navigate } from 'react-router-dom';
 import { ScrollText, ChevronLeft, ChevronRight } from 'lucide-react';
 import API from '../api/axios';
 import { useAuth } from '../context/AuthContext';
+import { esSuperAdmin } from '../utils/roles';
 
 const ACCIONES = [
   { value: '', label: 'Todas las acciones' },
@@ -29,7 +30,7 @@ export default function Bitacora() {
   const porPagina = 50;
 
   useEffect(() => {
-    if (!usuario || usuario.rol !== 'ADMIN') return;
+    if (!usuario || !esSuperAdmin(usuario)) return;
     API.get('auditoria/bitacora/', { params: { page: pagina, accion: accion || undefined } })
       .then((res) => {
         setResultados(res.data.results);
@@ -42,7 +43,7 @@ export default function Bitacora() {
 
   if (cargandoAuth) return null;
   if (!usuario) return <Navigate to="/login?next=/bitacora" replace />;
-  if (usuario.rol !== 'ADMIN') return <Navigate to="/" replace />;
+  if (!esSuperAdmin(usuario)) return <Navigate to="/" replace />;
 
   const totalPaginas = Math.max(1, Math.ceil(total / porPagina));
 

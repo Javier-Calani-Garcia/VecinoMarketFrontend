@@ -3,6 +3,7 @@ import { Navigate } from 'react-router-dom';
 import { UserCog, ChevronLeft, ChevronRight, Ban, RotateCcw, Search } from 'lucide-react';
 import API from '../../api/axios';
 import { useAuth } from '../../context/AuthContext';
+import { esStaff } from '../../utils/roles';
 
 const ESTADOS = [
   { value: '', label: 'Todos los estados' },
@@ -43,7 +44,7 @@ export default function Empleados() {
   }
 
   useEffect(() => {
-    if (!usuario || usuario.rol !== 'ADMIN') return;
+    if (!usuario || !esStaff(usuario)) return;
     cargarEmpleados();
     API.get('usuarios/permisos/').then((res) => setPermisos(res.data)).catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -51,7 +52,7 @@ export default function Empleados() {
 
   if (cargandoAuth) return null;
   if (!usuario) return <Navigate to="/login?next=/admin/empleados" replace />;
-  if (usuario.rol !== 'ADMIN') return <Navigate to="/" replace />;
+  if (!esStaff(usuario)) return <Navigate to="/" replace />;
 
   async function toggleEstado(empleado) {
     setAccionando(empleado.id);
