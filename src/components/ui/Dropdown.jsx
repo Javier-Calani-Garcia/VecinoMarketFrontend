@@ -1,6 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 
-export default function Dropdown({ trigger, children, align = 'left', panelClassName = '', triggerClassName = '' }) {
+export default function Dropdown({
+  trigger,
+  children,
+  align = 'left',
+  panelClassName = '',
+  triggerClassName = '',
+  panelPositionClassName,
+}) {
   const [abierto, setAbierto] = useState(false);
   const ref = useRef(null);
 
@@ -24,7 +31,7 @@ export default function Dropdown({ trigger, children, align = 'left', panelClass
       {abierto && (
         <div
           onClick={() => setAbierto(false)}
-          className={`absolute z-50 mt-2 ${align === 'right' ? 'right-0' : 'left-0'} ${panelClassName}`}
+          className={`z-50 ${panelPositionClassName ?? `absolute mt-2 ${align === 'right' ? 'right-0' : 'left-0'}`} ${panelClassName}`}
         >
           {children}
         </div>

@@ -11,7 +11,8 @@ export default function AccountMenu() {
     <Dropdown
       align="right"
       triggerClassName="rounded-full px-2 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
-      panelClassName={`${usuario?.rol === 'ADMIN' ? 'w-80' : 'w-56'} rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 py-2 shadow-lg text-sm text-gray-700 dark:text-gray-200 max-h-[80vh] overflow-y-auto`}
+      panelPositionClassName="fixed inset-x-3 top-16 sm:absolute sm:inset-x-auto sm:top-auto sm:right-0 sm:mt-2"
+      panelClassName={`${usuario?.rol === 'ADMIN' ? 'sm:w-80' : 'sm:w-56'} rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 py-2 shadow-lg text-sm text-gray-700 dark:text-gray-200 max-h-[80vh] overflow-y-auto`}
       trigger={
         <>
           <User size={20} />
