@@ -67,15 +67,13 @@ export const GRUPOS_ADMIN = [
         cu: 'CU05',
         titulo: 'Buscar y Explorar Catálogo de Productos',
         to: '/admin/catalogo',
-        descripcion:
-          'Vista administrativa del catálogo público, con los mismos filtros de búsqueda y categorías que ve el comprador, para supervisión y soporte.',
+        implementado: true,
       },
       {
         cu: 'CU25',
-        titulo: 'Personalizar Vitrina Digital de Empresa',
-        to: '/admin/vitrina',
-        descripcion:
-          'Permite a cada empresa personalizar el diseño de su vitrina (banner, colores, orden de productos destacados) dentro del marketplace.',
+        titulo: 'Métodos de Pago de Empresas',
+        to: '/admin/metodos-pago',
+        implementado: true,
       },
     ],
   },

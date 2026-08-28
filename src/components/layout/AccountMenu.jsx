@@ -1,9 +1,9 @@
 import { Link } from 'react-router-dom';
-import { User, LogOut, ChevronDown } from 'lucide-react';
+import { User, LogOut, ChevronDown, Wallet } from 'lucide-react';
 import Dropdown from '../ui/Dropdown';
 import AdminMenu from './AdminMenu';
 import { useAuth } from '../../context/AuthContext';
-import { esStaff } from '../../utils/roles';
+import { esStaff, esEmpresaOEmpleado } from '../../utils/roles';
 
 export default function AccountMenu() {
   const { usuario, logout } = useAuth();
@@ -26,6 +26,11 @@ export default function AccountMenu() {
         <>
           <div className="px-4 py-1.5 text-xs text-gray-400 dark:text-gray-500">Hola, {usuario.nombre}</div>
           <Link to="/perfil" className="block px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700">Mi perfil</Link>
+          {esEmpresaOEmpleado(usuario) && (
+            <Link to="/mi-empresa/metodos-pago" className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700">
+              <Wallet size={16} /> Métodos de pago
+            </Link>
+          )}
           {esStaff(usuario) && (
             <>
               <div className="my-1 border-t border-gray-100 dark:border-gray-700" />

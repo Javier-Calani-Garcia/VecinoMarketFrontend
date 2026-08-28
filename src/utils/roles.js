@@ -8,3 +8,10 @@ export function esStaff(usuario) {
 export function esSuperAdmin(usuario) {
   return !!usuario && usuario.rol === 'SUPERADMIN';
 }
+
+// Dueño de una empresa o empleado suyo — quienes pueden llegar a tener acceso
+// a las secciones de autogestión de la empresa (aunque el empleado necesite
+// además el permiso puntual, que valida el backend).
+export function esEmpresaOEmpleado(usuario) {
+  return !!usuario && (usuario.rol === 'EMPRESA' || usuario.rol === 'EMPLEADO');
+}
