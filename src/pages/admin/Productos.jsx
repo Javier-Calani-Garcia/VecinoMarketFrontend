@@ -4,6 +4,7 @@ import { Boxes, Plus, Pencil, Trash2, Search, ChevronLeft, ChevronRight, X, Imag
 import API from '../../api/axios';
 import { useAuth } from '../../context/AuthContext';
 import { esStaff } from '../../utils/roles';
+import SugerenciaCategoriaIA from '../../components/admin/SugerenciaCategoriaIA';
 
 const ESTADOS = [
   { value: '', label: 'Todos los estados' },
@@ -201,8 +202,11 @@ export default function Productos() {
           <Plus size={16} /> Nuevo producto
         </button>
       </div>
-      <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+      <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">
         CU07 · Productos de todas las empresas, cualquiera sea su estado.
+      </p>
+      <p className="text-xs text-gray-400 dark:text-gray-500 mb-6">
+        + CU08 · Categorizar Producto mediante Visión Artificial (al editar un producto con imagen)
       </p>
 
       <div className="flex flex-wrap items-center gap-3 mb-4">
@@ -364,6 +368,15 @@ export default function Productos() {
                   {categorias.map((c) => <option key={c.id} value={c.id}>{c.nombre}</option>)}
                 </select>
               </div>
+
+              {editando && (
+                <SugerenciaCategoriaIA
+                  productoId={editando.id}
+                  tieneImagenes={editando.imagenes.length > 0}
+                  onAplicar={(categoriaId) => setForm((prev) => ({ ...prev, categoria: categoriaId }))}
+                />
+              )}
+
               <div className="grid grid-cols-3 gap-2">
                 <input
                   required

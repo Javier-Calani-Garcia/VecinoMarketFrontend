@@ -6,6 +6,7 @@ import {
 import API from '../../api/axios';
 import { useAuth } from '../../context/AuthContext';
 import { esStaff } from '../../utils/roles';
+import SugerenciaCategoriaIA from '../../components/admin/SugerenciaCategoriaIA';
 
 const ESTADOS = [
   { value: '', label: 'Todos los estados' },
@@ -242,8 +243,11 @@ export default function CatalogosEmpresas() {
             <Plus size={16} /> Nuevo producto
           </button>
         </div>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">
           CU05 · Catálogo de esta empresa — ver, buscar, editar y eliminar sus productos.
+        </p>
+        <p className="text-xs text-gray-400 dark:text-gray-500 mb-6">
+          + CU08 · Categorizar Producto mediante Visión Artificial (al editar un producto con imagen)
         </p>
 
         <div className="flex flex-wrap items-center gap-3 mb-4">
@@ -369,6 +373,15 @@ export default function CatalogosEmpresas() {
                   <option value="">Sin categoría</option>
                   {categorias.map((c) => <option key={c.id} value={c.id}>{c.nombre}</option>)}
                 </select>
+
+                {editando && (
+                  <SugerenciaCategoriaIA
+                    productoId={editando.id}
+                    tieneImagenes={editando.imagenes.length > 0}
+                    onAplicar={(categoriaId) => setForm((prev) => ({ ...prev, categoria: categoriaId }))}
+                  />
+                )}
+
                 <div className="grid grid-cols-3 gap-2">
                   <input
                     required
@@ -476,8 +489,11 @@ export default function CatalogosEmpresas() {
         <Store className="text-brand-600 dark:text-brand-400" size={24} />
         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Catálogos de empresas</h1>
       </div>
-      <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+      <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">
         CU05 · Busca una empresa para ver, buscar, editar y eliminar los productos de su catálogo.
+      </p>
+      <p className="text-xs text-gray-400 dark:text-gray-500 mb-6">
+        + CU08 · Categorizar Producto mediante Visión Artificial (al editar un producto con imagen)
       </p>
 
       <form onSubmit={buscarEmpresa} className="flex items-center gap-2 mb-6">

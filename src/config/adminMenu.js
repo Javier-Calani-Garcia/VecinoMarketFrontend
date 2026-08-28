@@ -59,9 +59,9 @@ export const GRUPOS_ADMIN = [
       {
         cu: 'CU08',
         titulo: 'Categorizar Producto mediante Visión Artificial',
-        to: '/admin/vision-artificial',
-        descripcion:
-          'Clasifica automáticamente los productos que suben las empresas usando un modelo de visión artificial, sugiriendo la categoría antes de publicarlos.',
+        to: '/admin/productos',
+        implementado: true,
+        descripcion: 'Botón "Sugerir categoría con IA" dentro de editar producto (CU07) y catálogo por empresa (CU05).',
       },
       {
         cu: 'CU05',
