@@ -11,7 +11,7 @@ const labelClass = 'block text-sm font-medium text-gray-700 dark:text-gray-300 m
 export default function Profile() {
   const { usuario, cargando, logout, actualizarPerfil } = useAuth();
   const [editando, setEditando] = useState(false);
-  const [form, setForm] = useState({ nombre: '', apellido: '', telefono: '' });
+  const [form, setForm] = useState({ email: '', nombre: '', apellido: '', telefono: '' });
   const [errorPerfil, setErrorPerfil] = useState('');
   const [guardando, setGuardando] = useState(false);
 
@@ -23,8 +23,15 @@ export default function Profile() {
   if (cargando) return null;
   if (!usuario) return <Navigate to="/login?next=/perfil" replace />;
 
+  const esAdmin = usuario.rol === 'ADMIN';
+
   function iniciarEdicion() {
-    setForm({ nombre: usuario.nombre || '', apellido: usuario.apellido || '', telefono: usuario.telefono || '' });
+    setForm({
+      email: usuario.email || '',
+      nombre: usuario.nombre || '',
+      apellido: usuario.apellido || '',
+      telefono: usuario.telefono || '',
+    });
     setErrorPerfil('');
     setEditando(true);
   }
@@ -34,10 +41,10 @@ export default function Profile() {
     setErrorPerfil('');
     setGuardando(true);
     try {
-      await actualizarPerfil(form);
+      await actualizarPerfil(esAdmin ? form : { nombre: form.nombre, apellido: form.apellido, telefono: form.telefono });
       setEditando(false);
-    } catch {
-      setErrorPerfil('No se pudo guardar los cambios.');
+    } catch (err) {
+      setErrorPerfil(err?.response?.data?.email?.[0] || 'No se pudo guardar los cambios.');
     } finally {
       setGuardando(false);
     }
@@ -74,6 +81,18 @@ export default function Profile() {
       <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6">
         {editando ? (
           <form onSubmit={guardarPerfil} className="space-y-4">
+            {esAdmin && (
+              <div>
+                <label className={labelClass}>Email</label>
+                <input
+                  required
+                  type="email"
+                  value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  className={inputClass}
+                />
+              </div>
+            )}
             <div>
               <label className={labelClass}>Nombre</label>
               <input

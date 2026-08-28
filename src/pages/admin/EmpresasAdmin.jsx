@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
-import { Building2, ChevronLeft, ChevronRight, Ban, RotateCcw, Search, Check, X, CreditCard } from 'lucide-react';
+import { Building2, ChevronLeft, ChevronRight, Ban, RotateCcw, Search, Check, X, CreditCard, Pencil } from 'lucide-react';
 import API from '../../api/axios';
 import { useAuth } from '../../context/AuthContext';
 
@@ -36,6 +36,12 @@ function labelSuscripcion(estado) {
   return 'Solicitando suscripción';
 }
 
+function fechaEnDias(dias) {
+  const f = new Date();
+  f.setDate(f.getDate() + dias);
+  return f.toISOString().slice(0, 10);
+}
+
 function slugSugerido(texto) {
   return texto
     .toLowerCase()
@@ -66,13 +72,19 @@ export default function EmpresasAdmin() {
   const [slugPorSolicitud, setSlugPorSolicitud] = useState({});
   const [motivoPorSolicitud, setMotivoPorSolicitud] = useState({});
 
-  // --- Modal "Asignar plan" ---
+  // --- Modal "Editar suscripción" ---
   const [empresaParaAsignar, setEmpresaParaAsignar] = useState(null);
   const [planes, setPlanes] = useState([]);
   const [planSeleccionado, setPlanSeleccionado] = useState('');
-  const [dias, setDias] = useState(30);
+  const [fechaVencimiento, setFechaVencimiento] = useState('');
   const [asignando, setAsignando] = useState(false);
   const [errorAsignar, setErrorAsignar] = useState('');
+
+  // --- Modal "Editar empresa" ---
+  const [empresaEditando, setEmpresaEditando] = useState(null);
+  const [datosEdicion, setDatosEdicion] = useState({});
+  const [guardandoEdicion, setGuardandoEdicion] = useState(false);
+  const [errorEdicion, setErrorEdicion] = useState('');
 
   const porPagina = 30;
 
@@ -168,8 +180,8 @@ export default function EmpresasAdmin() {
 
   function abrirAsignarPlan(empresa) {
     setEmpresaParaAsignar(empresa);
-    setPlanSeleccionado('');
-    setDias(30);
+    setPlanSeleccionado(empresa.plan ?? '');
+    setFechaVencimiento(empresa.fecha_vencimiento || fechaEnDias(30));
     setErrorAsignar('');
     if (planes.length === 0) {
       API.get('suscripciones/planes/')
@@ -183,18 +195,50 @@ export default function EmpresasAdmin() {
       setErrorAsignar('Elige un plan.');
       return;
     }
+    if (!fechaVencimiento) {
+      setErrorAsignar('Elige una fecha de vencimiento.');
+      return;
+    }
     setAsignando(true);
     try {
-      await API.post(`suscripciones/empresas/${empresaParaAsignar.id}/asignar-plan/`, {
+      await API.post(`suscripciones/empresas/${empresaParaAsignar.id}/suscripcion/`, {
         plan_id: planSeleccionado,
-        dias,
+        fecha_vencimiento: fechaVencimiento,
       });
       setEmpresaParaAsignar(null);
       await cargarEmpresas();
     } catch (err) {
-      setErrorAsignar(err?.response?.data?.plan_id?.[0] || 'No se pudo asignar el plan.');
+      setErrorAsignar(err?.response?.data?.plan_id?.[0] || err?.response?.data?.fecha_vencimiento?.[0] || 'No se pudo guardar la suscripción.');
     } finally {
       setAsignando(false);
+    }
+  }
+
+  function abrirEdicion(empresa) {
+    setEmpresaEditando(empresa);
+    setDatosEdicion({
+      razon_social: empresa.razon_social || '',
+      nit: empresa.nit || '',
+      slug: empresa.slug || '',
+      ciudad: empresa.ciudad || '',
+      departamento: empresa.departamento || '',
+      estado: empresa.estado,
+    });
+    setErrorEdicion('');
+  }
+
+  async function guardarEdicion(e) {
+    e.preventDefault();
+    setGuardandoEdicion(true);
+    setErrorEdicion('');
+    try {
+      await API.patch(`usuarios/empresas/${empresaEditando.id}/editar/`, datosEdicion);
+      setEmpresaEditando(null);
+      await cargarEmpresas();
+    } catch (err) {
+      setErrorEdicion(err?.response?.data?.slug?.[0] || err?.response?.data?.nit?.[0] || 'No se pudo guardar los cambios.');
+    } finally {
+      setGuardandoEdicion(false);
     }
   }
 
@@ -320,14 +364,18 @@ export default function EmpresasAdmin() {
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-2">
-                        {e.estado_suscripcion !== 'ACTIVA' && (
-                          <button
-                            onClick={() => abrirAsignarPlan(e)}
-                            className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 dark:bg-blue-900/30 px-3 py-1.5 text-xs font-semibold text-blue-700 dark:text-blue-400 hover:bg-blue-100"
-                          >
-                            <CreditCard size={12} /> Asignar plan
-                          </button>
-                        )}
+                        <button
+                          onClick={() => abrirEdicion(e)}
+                          className="inline-flex items-center gap-1.5 rounded-full bg-gray-100 dark:bg-gray-800 px-3 py-1.5 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-200"
+                        >
+                          <Pencil size={12} /> Editar
+                        </button>
+                        <button
+                          onClick={() => abrirAsignarPlan(e)}
+                          className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 dark:bg-blue-900/30 px-3 py-1.5 text-xs font-semibold text-blue-700 dark:text-blue-400 hover:bg-blue-100"
+                        >
+                          <CreditCard size={12} /> Suscripción
+                        </button>
                         {e.estado !== 'CANCELADA' && (
                           <button
                             onClick={() => toggleEstado(e)}
@@ -426,7 +474,7 @@ export default function EmpresasAdmin() {
             className="w-full max-w-sm rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-5 shadow-lg"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">Asignar plan</h2>
+            <h2 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">Editar suscripción</h2>
             <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">{empresaParaAsignar.razon_social}</p>
 
             <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Plan</label>
@@ -441,12 +489,11 @@ export default function EmpresasAdmin() {
               ))}
             </select>
 
-            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Duración (días)</label>
+            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Fecha de vencimiento</label>
             <input
-              type="number"
-              min={1}
-              value={dias}
-              onChange={(e) => setDias(Number(e.target.value))}
+              type="date"
+              value={fechaVencimiento}
+              onChange={(e) => setFechaVencimiento(e.target.value)}
               className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm mb-4 focus:outline-none focus:ring-2 focus:ring-brand-300"
             />
 
@@ -468,6 +515,83 @@ export default function EmpresasAdmin() {
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {empresaEditando && (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-black/40 px-4" onClick={() => setEmpresaEditando(null)}>
+          <form
+            onSubmit={guardarEdicion}
+            className="w-full max-w-sm rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-5 shadow-lg"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">Editar empresa</h2>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">Como SuperAdmin puedes editar cualquier dato de esta empresa.</p>
+
+            <div className="space-y-3">
+              <input
+                required
+                value={datosEdicion.razon_social}
+                onChange={(e) => setDatosEdicion((prev) => ({ ...prev, razon_social: e.target.value }))}
+                placeholder="Razón social"
+                className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-300"
+              />
+              <input
+                required
+                value={datosEdicion.nit}
+                onChange={(e) => setDatosEdicion((prev) => ({ ...prev, nit: e.target.value }))}
+                placeholder="NIT"
+                className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-300"
+              />
+              <input
+                required
+                value={datosEdicion.slug}
+                onChange={(e) => setDatosEdicion((prev) => ({ ...prev, slug: e.target.value }))}
+                placeholder="slug-de-la-empresa"
+                className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-300"
+              />
+              <div className="grid grid-cols-2 gap-2">
+                <input
+                  value={datosEdicion.ciudad}
+                  onChange={(e) => setDatosEdicion((prev) => ({ ...prev, ciudad: e.target.value }))}
+                  placeholder="Ciudad"
+                  className="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-300"
+                />
+                <input
+                  value={datosEdicion.departamento}
+                  onChange={(e) => setDatosEdicion((prev) => ({ ...prev, departamento: e.target.value }))}
+                  placeholder="Departamento"
+                  className="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-300"
+                />
+              </div>
+              <select
+                value={datosEdicion.estado}
+                onChange={(e) => setDatosEdicion((prev) => ({ ...prev, estado: e.target.value }))}
+                className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-300"
+              >
+                {ESTADOS.filter((op) => op.value).map((op) => <option key={op.value} value={op.value}>{op.label}</option>)}
+              </select>
+            </div>
+
+            {errorEdicion && <p className="text-xs text-red-600 dark:text-red-400 mt-3">{errorEdicion}</p>}
+
+            <div className="flex gap-2 mt-4">
+              <button
+                type="button"
+                onClick={() => setEmpresaEditando(null)}
+                className="flex-1 rounded-md border border-gray-300 dark:border-gray-700 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                disabled={guardandoEdicion}
+                className="flex-1 rounded-md bg-brand-600 px-3 py-2 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-60"
+              >
+                {guardandoEdicion ? 'Guardando...' : 'Guardar'}
+              </button>
+            </div>
+          </form>
         </div>
       )}
     </div>

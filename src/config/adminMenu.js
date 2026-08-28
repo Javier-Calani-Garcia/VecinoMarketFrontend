@@ -29,8 +29,7 @@ export const GRUPOS_ADMIN = [
         cu: 'CU09',
         titulo: 'Gestionar Empleados y Permisos',
         to: '/admin/empleados',
-        descripcion:
-          'Define qué puede ver y hacer cada empleado de una empresa: a qué secciones tiene acceso su cuenta.',
+        implementado: true,
       },
       {
         cu: 'CU24',

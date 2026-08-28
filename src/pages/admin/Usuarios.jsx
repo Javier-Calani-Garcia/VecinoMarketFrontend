@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
-import { Users, ChevronLeft, ChevronRight, Lock, Unlock, Search } from 'lucide-react';
+import { Users, ChevronLeft, ChevronRight, Lock, Unlock, Search, UserPlus, Pencil } from 'lucide-react';
 import API from '../../api/axios';
 import { useAuth } from '../../context/AuthContext';
+
+const NUEVO_USUARIO_VACIO = { nombre: '', apellido: '', email: '', telefono: '', password: '' };
 
 const ROLES = [
   { value: '', label: 'Todos los roles' },
@@ -37,17 +39,32 @@ export default function Usuarios() {
   const [accionando, setAccionando] = useState(null);
   const [error, setError] = useState('');
 
+  const [mostrarNuevo, setMostrarNuevo] = useState(false);
+  const [nuevoUsuario, setNuevoUsuario] = useState(NUEVO_USUARIO_VACIO);
+  const [registrando, setRegistrando] = useState(false);
+  const [errorNuevo, setErrorNuevo] = useState('');
+
+  const [usuarioEditando, setUsuarioEditando] = useState(null);
+  const [datosEdicion, setDatosEdicion] = useState({ email: '', nombre: '', apellido: '', telefono: '', rol: '', estado: '' });
+  const [guardandoEdicion, setGuardandoEdicion] = useState(false);
+  const [errorEdicion, setErrorEdicion] = useState('');
+
   const porPagina = 30;
 
-  useEffect(() => {
-    if (!usuario || usuario.rol !== 'ADMIN') return;
-    API.get('usuarios/lista/', { params: { page: pagina, rol: rol || undefined, estado: estado || undefined, q: busqueda || undefined } })
+  function cargarUsuarios() {
+    return API.get('usuarios/lista/', { params: { page: pagina, rol: rol || undefined, estado: estado || undefined, q: busqueda || undefined } })
       .then((res) => {
         setResultados(res.data.results);
         setTotal(res.data.count);
         setError('');
       })
       .catch(() => setError('No se pudo cargar la lista de usuarios.'));
+  }
+
+  useEffect(() => {
+    if (!usuario || usuario.rol !== 'ADMIN') return;
+    cargarUsuarios();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [usuario, pagina, rol, estado, busqueda]);
 
   if (cargandoAuth) return null;
@@ -75,16 +92,81 @@ export default function Usuarios() {
     setBusqueda(q);
   }
 
+  function abrirNuevoUsuario() {
+    setNuevoUsuario(NUEVO_USUARIO_VACIO);
+    setErrorNuevo('');
+    setMostrarNuevo(true);
+  }
+
+  async function registrarUsuario(e) {
+    e.preventDefault();
+    setRegistrando(true);
+    setErrorNuevo('');
+    try {
+      await API.post('usuarios/registrar/', nuevoUsuario);
+      setMostrarNuevo(false);
+      setPagina(1);
+      await cargarUsuarios();
+    } catch (err) {
+      const data = err?.response?.data || {};
+      setErrorNuevo(data.email?.[0] || data.password?.[0] || data.detail || 'No se pudo registrar el usuario.');
+    } finally {
+      setRegistrando(false);
+    }
+  }
+
+  function abrirEdicion(u) {
+    setUsuarioEditando(u);
+    setDatosEdicion({
+      email: u.email || '',
+      nombre: u.nombre || '',
+      apellido: u.apellido || '',
+      telefono: u.telefono || '',
+      rol: u.rol,
+      estado: u.estado,
+      password_nueva: '',
+    });
+    setErrorEdicion('');
+  }
+
+  async function guardarEdicion(e) {
+    e.preventDefault();
+    setGuardandoEdicion(true);
+    setErrorEdicion('');
+    try {
+      const { password_nueva, ...datos } = datosEdicion;
+      await API.patch(`usuarios/${usuarioEditando.id}/editar/`, datos);
+      if (password_nueva) {
+        await API.post(`usuarios/${usuarioEditando.id}/restablecer-password/`, { password_nueva });
+      }
+      setUsuarioEditando(null);
+      await cargarUsuarios();
+    } catch (err) {
+      const data = err?.response?.data || {};
+      setErrorEdicion(data.email?.[0] || data.password_nueva?.[0] || 'No se pudo guardar los cambios.');
+    } finally {
+      setGuardandoEdicion(false);
+    }
+  }
+
   const totalPaginas = Math.max(1, Math.ceil(total / porPagina));
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
-      <div className="flex items-center gap-2 mb-1">
-        <Users className="text-brand-600 dark:text-brand-400" size={24} />
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Gestión de usuarios</h1>
+      <div className="flex items-center justify-between gap-2 mb-1">
+        <div className="flex items-center gap-2">
+          <Users className="text-brand-600 dark:text-brand-400" size={24} />
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Gestión de usuarios</h1>
+        </div>
+        <button
+          onClick={abrirNuevoUsuario}
+          className="flex items-center gap-1.5 rounded-md bg-brand-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-brand-700"
+        >
+          <UserPlus size={16} /> Nuevo usuario
+        </button>
       </div>
       <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
-        Usuarios de toda la plataforma: compradores, empresas, empleados y administradores.
+        CU02 · Usuarios de toda la plataforma: compradores, empresas, empleados y administradores.
       </p>
 
       <div className="flex flex-wrap items-center gap-3 mb-4">
@@ -144,23 +226,31 @@ export default function Usuarios() {
                 <td className="px-4 py-3 text-gray-500 dark:text-gray-400 whitespace-nowrap">
                   {new Date(u.fecha_registro).toLocaleDateString('es-BO')}
                 </td>
-                <td className="px-4 py-3 text-right">
-                  {u.id === usuario.id ? (
-                    <span className="text-xs text-gray-400 dark:text-gray-500">Tu cuenta</span>
-                  ) : (
+                <td className="px-4 py-3">
+                  <div className="flex items-center justify-end gap-2">
                     <button
-                      onClick={() => toggleBloqueo(u)}
-                      disabled={accionando === u.id}
-                      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold disabled:opacity-50 ${
-                        u.estado === 'BLOQUEADO'
-                          ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400 hover:bg-green-100'
-                          : 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 hover:bg-red-100'
-                      }`}
+                      onClick={() => abrirEdicion(u)}
+                      className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 dark:bg-blue-900/30 px-3 py-1.5 text-xs font-semibold text-blue-700 dark:text-blue-400 hover:bg-blue-100"
                     >
-                      {u.estado === 'BLOQUEADO' ? <Unlock size={12} /> : <Lock size={12} />}
-                      {u.estado === 'BLOQUEADO' ? 'Desbloquear' : 'Bloquear'}
+                      <Pencil size={12} /> Editar
                     </button>
-                  )}
+                    {u.id === usuario.id ? (
+                      <span className="text-xs text-gray-400 dark:text-gray-500">Tu cuenta</span>
+                    ) : (
+                      <button
+                        onClick={() => toggleBloqueo(u)}
+                        disabled={accionando === u.id}
+                        className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold disabled:opacity-50 ${
+                          u.estado === 'BLOQUEADO'
+                            ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400 hover:bg-green-100'
+                            : 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 hover:bg-red-100'
+                        }`}
+                      >
+                        {u.estado === 'BLOQUEADO' ? <Unlock size={12} /> : <Lock size={12} />}
+                        {u.estado === 'BLOQUEADO' ? 'Desbloquear' : 'Bloquear'}
+                      </button>
+                    )}
+                  </div>
                 </td>
               </tr>
             ))}
@@ -182,6 +272,163 @@ export default function Usuarios() {
           </button>
         </div>
       </div>
+
+      {mostrarNuevo && (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-black/40 px-4" onClick={() => setMostrarNuevo(false)}>
+          <form
+            onSubmit={registrarUsuario}
+            className="w-full max-w-sm rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-5 shadow-lg"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">Nuevo usuario</h2>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">Se registra como comprador.</p>
+
+            <div className="space-y-3">
+              <input
+                required
+                value={nuevoUsuario.nombre}
+                onChange={(e) => setNuevoUsuario((prev) => ({ ...prev, nombre: e.target.value }))}
+                placeholder="Nombre"
+                className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-300"
+              />
+              <input
+                value={nuevoUsuario.apellido}
+                onChange={(e) => setNuevoUsuario((prev) => ({ ...prev, apellido: e.target.value }))}
+                placeholder="Apellido"
+                className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-300"
+              />
+              <input
+                required
+                type="email"
+                value={nuevoUsuario.email}
+                onChange={(e) => setNuevoUsuario((prev) => ({ ...prev, email: e.target.value }))}
+                placeholder="Email"
+                className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-300"
+              />
+              <input
+                value={nuevoUsuario.telefono}
+                onChange={(e) => setNuevoUsuario((prev) => ({ ...prev, telefono: e.target.value }))}
+                placeholder="Teléfono (opcional)"
+                className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-300"
+              />
+              <input
+                required
+                type="password"
+                minLength={8}
+                value={nuevoUsuario.password}
+                onChange={(e) => setNuevoUsuario((prev) => ({ ...prev, password: e.target.value }))}
+                placeholder="Contraseña (mínimo 8 caracteres)"
+                className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-300"
+              />
+            </div>
+
+            {errorNuevo && <p className="text-xs text-red-600 dark:text-red-400 mt-3">{errorNuevo}</p>}
+
+            <div className="flex gap-2 mt-4">
+              <button
+                type="button"
+                onClick={() => setMostrarNuevo(false)}
+                className="flex-1 rounded-md border border-gray-300 dark:border-gray-700 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                disabled={registrando}
+                className="flex-1 rounded-md bg-brand-600 px-3 py-2 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-60"
+              >
+                {registrando ? 'Registrando...' : 'Registrar'}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {usuarioEditando && (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-black/40 px-4" onClick={() => setUsuarioEditando(null)}>
+          <form
+            onSubmit={guardarEdicion}
+            className="w-full max-w-sm rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-5 shadow-lg"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">Editar usuario</h2>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">Como SuperAdmin puedes editar cualquier dato de esta cuenta.</p>
+
+            <div className="space-y-3">
+              <input
+                required
+                type="email"
+                value={datosEdicion.email}
+                onChange={(e) => setDatosEdicion((prev) => ({ ...prev, email: e.target.value }))}
+                placeholder="Email"
+                className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-300"
+              />
+              <input
+                required
+                value={datosEdicion.nombre}
+                onChange={(e) => setDatosEdicion((prev) => ({ ...prev, nombre: e.target.value }))}
+                placeholder="Nombre"
+                className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-300"
+              />
+              <input
+                value={datosEdicion.apellido}
+                onChange={(e) => setDatosEdicion((prev) => ({ ...prev, apellido: e.target.value }))}
+                placeholder="Apellido"
+                className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-300"
+              />
+              <input
+                value={datosEdicion.telefono}
+                onChange={(e) => setDatosEdicion((prev) => ({ ...prev, telefono: e.target.value }))}
+                placeholder="Teléfono"
+                className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-300"
+              />
+              <div className="grid grid-cols-2 gap-2">
+                <select
+                  value={datosEdicion.rol}
+                  onChange={(e) => setDatosEdicion((prev) => ({ ...prev, rol: e.target.value }))}
+                  className="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-300"
+                >
+                  {ROLES.filter((op) => op.value).map((op) => <option key={op.value} value={op.value}>{op.label}</option>)}
+                </select>
+                <select
+                  value={datosEdicion.estado}
+                  onChange={(e) => setDatosEdicion((prev) => ({ ...prev, estado: e.target.value }))}
+                  className="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-300"
+                >
+                  {ESTADOS.filter((op) => op.value).map((op) => <option key={op.value} value={op.value}>{op.label}</option>)}
+                </select>
+              </div>
+              <input
+                type="password"
+                minLength={8}
+                value={datosEdicion.password_nueva}
+                onChange={(e) => setDatosEdicion((prev) => ({ ...prev, password_nueva: e.target.value }))}
+                placeholder="Nueva contraseña (opcional, mínimo 8 caracteres)"
+                className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-300"
+              />
+            </div>
+
+            {errorEdicion && <p className="text-xs text-red-600 dark:text-red-400 mt-3">{errorEdicion}</p>}
+
+            <div className="flex gap-2 mt-4">
+              <button
+                type="button"
+                onClick={() => setUsuarioEditando(null)}
+                className="flex-1 rounded-md border border-gray-300 dark:border-gray-700 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                disabled={guardandoEdicion}
+                className="flex-1 rounded-md bg-brand-600 px-3 py-2 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-60"
+              >
+                {guardandoEdicion ? 'Guardando...' : 'Guardar'}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
     </div>
   );
 }
