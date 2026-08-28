@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
-import { User, LogOut, ChevronDown, ScrollText, Users, Building2, ShieldCheck } from 'lucide-react';
+import { User, LogOut, ChevronDown } from 'lucide-react';
 import Dropdown from '../ui/Dropdown';
+import AdminMenu from './AdminMenu';
 import { useAuth } from '../../context/AuthContext';
 
 export default function AccountMenu() {
@@ -10,7 +11,7 @@ export default function AccountMenu() {
     <Dropdown
       align="right"
       triggerClassName="rounded-full px-2 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
-      panelClassName="w-56 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 py-2 shadow-lg text-sm text-gray-700 dark:text-gray-200"
+      panelClassName={`${usuario?.rol === 'ADMIN' ? 'w-80' : 'w-56'} rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 py-2 shadow-lg text-sm text-gray-700 dark:text-gray-200 max-h-[80vh] overflow-y-auto`}
       trigger={
         <>
           <User size={20} />
@@ -26,18 +27,7 @@ export default function AccountMenu() {
           {usuario.rol === 'ADMIN' && (
             <>
               <div className="my-1 border-t border-gray-100 dark:border-gray-700" />
-              <Link to="/bitacora" className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700">
-                <ScrollText size={16} /> Bitácora
-              </Link>
-              <Link to="/admin/usuarios" className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700">
-                <Users size={16} /> Usuarios
-              </Link>
-              <Link to="/admin/empresas" className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700">
-                <Building2 size={16} /> Empresas
-              </Link>
-              <Link to="/admin/roles" className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700">
-                <ShieldCheck size={16} /> Roles y permisos
-              </Link>
+              <AdminMenu />
             </>
           )}
           <button

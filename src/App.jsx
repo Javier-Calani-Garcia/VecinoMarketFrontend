@@ -14,7 +14,11 @@ import Bitacora from './pages/Bitacora';
 import Usuarios from './pages/admin/Usuarios';
 import EmpresasAdmin from './pages/admin/EmpresasAdmin';
 import RolesBase from './pages/admin/RolesBase';
+import EnConstruccion from './pages/admin/EnConstruccion';
 import NotFound from './pages/NotFound';
+import { GRUPOS_ADMIN } from './config/adminMenu';
+
+const rutasAdminPendientes = GRUPOS_ADMIN.flatMap((grupo) => grupo.items).filter((item) => !item.implementado);
 
 function App() {
   return (
@@ -35,6 +39,13 @@ function App() {
         <Route path="/admin/usuarios" element={<Usuarios />} />
         <Route path="/admin/empresas" element={<EmpresasAdmin />} />
         <Route path="/admin/roles" element={<RolesBase />} />
+        {rutasAdminPendientes.map((item) => (
+          <Route
+            key={item.cu}
+            path={item.to}
+            element={<EnConstruccion cu={item.cu} titulo={item.titulo} descripcion={item.descripcion} />}
+          />
+        ))}
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>
