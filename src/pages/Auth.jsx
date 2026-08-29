@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import GoogleSignInButton from '../components/auth/GoogleSignInButton';
 import RecaptchaCheckbox from '../components/auth/RecaptchaCheckbox';
 import PasswordInput from '../components/ui/PasswordInput';
@@ -10,10 +11,15 @@ const labelClass = 'block text-sm font-medium text-gray-700 dark:text-gray-300 m
 
 export default function Auth() {
   const { login, registrarComprador, loginConGoogle } = useAuth();
+  const { tema } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const next = searchParams.get('next') || '/';
+
+  const [logoError, setLogoError] = useState(false);
+  const [logoOscuroError, setLogoOscuroError] = useState(false);
+  const usarLogoOscuro = tema === 'dark' && !logoOscuroError;
 
   // Derivado de la URL (no de un useState) para que también reaccione a
   // navegaciones que no pasan por cambiarTab (p. ej. el link "Crear Cuenta"
@@ -112,7 +118,28 @@ export default function Auth() {
       <div className="absolute inset-x-0 top-0 -bottom-16 bg-black/50 dark:bg-black/70" />
 
       <div className="relative w-full max-w-md rounded-2xl bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm shadow-2xl p-8">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6 text-center">Bienvenido a VecinoMarket</h1>
+        <h1 className="flex flex-wrap items-center justify-center gap-2 text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6 text-center">
+          Bienvenido a
+          {logoError ? (
+            <span className="text-brand-600">VecinoMarket</span>
+          ) : usarLogoOscuro ? (
+            <img
+              src="/logo-dark.png"
+              alt="VecinoMarket"
+              className="h-7 w-auto object-contain"
+              onError={() => setLogoOscuroError(true)}
+            />
+          ) : (
+            <span className="dark:bg-white dark:rounded-lg dark:px-2 dark:py-1 inline-flex items-center">
+              <img
+                src="/logo.png"
+                alt="VecinoMarket"
+                className="h-7 w-auto object-contain"
+                onError={() => setLogoError(true)}
+              />
+            </span>
+          )}
+        </h1>
 
         <div className="flex rounded-full bg-gray-100 dark:bg-gray-800 p-1 mb-6">
         <button
