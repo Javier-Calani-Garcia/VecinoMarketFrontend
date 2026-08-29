@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { User, LogOut, ChevronDown, Wallet, ClipboardList, Truck, MapPin, Receipt, Star, Tag, Users, MessageCircle, Radio, Bot, LayoutDashboard, Sparkles, UserCog, Building2, Boxes } from 'lucide-react';
+import { User, LogOut, ChevronDown, Wallet, ClipboardList, Truck, MapPin, Receipt, Star, Tag, Users, MessageCircle, Radio, Bot, LayoutDashboard, Sparkles, UserCog, Building2, Boxes, CreditCard } from 'lucide-react';
 import Dropdown from '../ui/Dropdown';
 import AdminMenu from './AdminMenu';
 import { useAuth } from '../../context/AuthContext';
@@ -78,11 +78,17 @@ export default function AccountMenu() {
           )}
           {esComprador(usuario) && (
             <>
+              <Link to="/mi-cuenta" className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700">
+                <LayoutDashboard size={16} /> Mi cuenta
+              </Link>
               <Link to="/recomendados" className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700">
                 <Sparkles size={16} /> Recomendado para ti
               </Link>
               <Link to="/mis-direcciones" className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700">
                 <MapPin size={16} /> Mis direcciones
+              </Link>
+              <Link to="/mis-tarjetas" className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700">
+                <CreditCard size={16} /> Métodos de pago
               </Link>
               <Link to="/mis-compras" className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700">
                 <Receipt size={16} /> Mis compras

@@ -29,9 +29,11 @@ import MisDirecciones from './pages/MisDirecciones';
 import Facturacion from './pages/admin/Facturacion';
 import MisFacturas from './pages/empresa/MisFacturas';
 import MisCompras from './pages/MisCompras';
+import DashboardComprador from './pages/DashboardComprador';
 import Reputacion from './pages/admin/Reputacion';
 import MiReputacion from './pages/empresa/MiReputacion';
 import MisResenas from './pages/MisResenas';
+import MisTarjetas from './pages/MisTarjetas';
 import Promociones from './pages/admin/Promociones';
 import MisPromociones from './pages/empresa/MisPromociones';
 import Referidos from './pages/admin/Referidos';
@@ -99,9 +101,11 @@ function App() {
         <Route path="/admin/facturacion" element={<Facturacion />} />
         <Route path="/mi-empresa/facturas" element={<MisFacturas />} />
         <Route path="/mis-compras" element={<MisCompras />} />
+        <Route path="/mi-cuenta" element={<DashboardComprador />} />
         <Route path="/admin/reputacion" element={<Reputacion />} />
         <Route path="/mi-empresa/reputacion" element={<MiReputacion />} />
         <Route path="/mis-resenas" element={<MisResenas />} />
+        <Route path="/mis-tarjetas" element={<MisTarjetas />} />
         <Route path="/admin/promociones" element={<Promociones />} />
         <Route path="/mi-empresa/promociones" element={<MisPromociones />} />
         <Route path="/admin/referidos" element={<Referidos />} />

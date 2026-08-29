@@ -5,6 +5,18 @@ import API from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import { esComprador } from '../utils/roles';
 
+const ESTADO_LABEL = {
+  PENDIENTE: 'Pendiente', CONFIRMADO: 'Confirmado', EN_PREPARACION: 'En preparación',
+  ENVIADO: 'Enviado', ENTREGADO: 'Entregado', CANCELADO: 'Cancelado',
+};
+
+function badgeEstado(estado) {
+  if (estado === 'ENTREGADO') return 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400';
+  if (estado === 'CANCELADO') return 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400';
+  if (estado === 'ENVIADO') return 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400';
+  return 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400';
+}
+
 function exportarCsv(numeroPedido, compra) {
   const filas = [['Producto', 'Cantidad', 'Precio unitario', 'Subtotal']];
   compra.items.forEach((it) => filas.push([it.producto_nombre, it.cantidad, it.precio_unitario, it.subtotal]));
@@ -46,7 +58,7 @@ export default function MisCompras() {
         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Mis compras</h1>
       </div>
       <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
-        CU26 · Recibos de tus compras ya pagadas — puedes verlos, imprimirlos o exportarlos.
+        CU26 · Recibos de tus compras ya pagadas, con el estado de entrega de cada una — puedes verlos, imprimirlos o exportarlos.
       </p>
 
       {error && <p className="text-sm text-red-600 dark:text-red-400 mb-4">{error}</p>}
@@ -62,7 +74,10 @@ export default function MisCompras() {
               <button onClick={() => setExpandido((prev) => (prev === c.id ? null : c.id))} className="flex items-center gap-2 text-left min-w-0">
                 {expandido === c.id ? <ChevronUp size={14} className="shrink-0 text-gray-400" /> : <ChevronDown size={14} className="shrink-0 text-gray-400" />}
                 <div className="min-w-0">
-                  <div className="font-semibold text-gray-900 dark:text-gray-100 truncate">{c.numero_pedido} · {c.empresa_nombre}</div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-gray-900 dark:text-gray-100 truncate">{c.numero_pedido} · {c.empresa_nombre}</span>
+                    <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold ${badgeEstado(c.estado)}`}>{ESTADO_LABEL[c.estado] || c.estado}</span>
+                  </div>
                   <div className="text-xs text-gray-400 dark:text-gray-500">{new Date(c.fecha).toLocaleDateString()} · {c.metodo_pago}</div>
                 </div>
               </button>

@@ -35,6 +35,7 @@ export function CartProvider({ children }) {
           precio: producto.precio_descuento ?? producto.precio,
           imagen: producto.imagen,
           empresa: producto.empresa,
+          empresaId: producto.empresaId,
           cantidad,
         },
       ];
