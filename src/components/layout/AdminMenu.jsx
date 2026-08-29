@@ -13,7 +13,7 @@ export default function AdminMenu() {
   return (
     <div className="py-1">
       {GRUPOS_ADMIN.map((grupo, i) => {
-        const items = grupo.items.filter((item) => esSuper || !item.soloSuperAdmin);
+        const items = grupo.items.filter((item) => (esSuper || !item.soloSuperAdmin) && !item.ocultoParaStaff);
         if (items.length === 0) return null;
         const expandido = abierto === grupo.id;
         return (

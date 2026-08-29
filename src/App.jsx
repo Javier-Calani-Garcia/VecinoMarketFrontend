@@ -47,6 +47,12 @@ import ChatbotEmpresas from './pages/ChatbotEmpresas';
 import ChatbotAdmin from './pages/admin/ChatbotAdmin';
 import RolesBase from './pages/admin/RolesBase';
 import CambiarRoles from './pages/admin/CambiarRoles';
+import ReportesEmpresaAdmin from './pages/admin/ReportesEmpresaAdmin';
+import DashboardAdmin from './pages/admin/DashboardAdmin';
+import DashboardEmpresa from './pages/empresa/DashboardEmpresa';
+import PlanesAdmin from './pages/admin/PlanesAdmin';
+import Recomendaciones from './pages/Recomendaciones';
+import NotificacionesAdmin from './pages/admin/NotificacionesAdmin';
 import EnConstruccion from './pages/admin/EnConstruccion';
 import NotFound from './pages/NotFound';
 import { GRUPOS_ADMIN } from './config/adminMenu';
@@ -105,6 +111,12 @@ function App() {
         <Route path="/admin/chatbot" element={<ChatbotAdmin />} />
         <Route path="/admin/roles" element={<RolesBase />} />
         <Route path="/admin/cambiar-roles" element={<CambiarRoles />} />
+        <Route path="/admin/reportes-empresa" element={<ReportesEmpresaAdmin />} />
+        <Route path="/admin/reportes-admin" element={<DashboardAdmin />} />
+        <Route path="/mi-empresa/dashboard" element={<DashboardEmpresa />} />
+        <Route path="/admin/planes" element={<PlanesAdmin />} />
+        <Route path="/recomendados" element={<Recomendaciones />} />
+        <Route path="/admin/notificaciones" element={<NotificacionesAdmin />} />
         {rutasAdminPendientes.map((item) => (
           <Route
             key={item.cu}

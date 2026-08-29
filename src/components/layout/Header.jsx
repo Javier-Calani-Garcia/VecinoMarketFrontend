@@ -5,10 +5,12 @@ import * as Icons from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { useCatalogo } from '../../context/CatalogoContext';
 import { useTheme } from '../../context/ThemeContext';
+import { useAuth } from '../../context/AuthContext';
 import ExploreMenu from './ExploreMenu';
 import DepartamentoMenu from './DepartamentoMenu';
 import AccountMenu from './AccountMenu';
 import ThemeToggle from './ThemeToggle';
+import NotificationBell from './NotificationBell';
 
 export default function Header() {
   const [query, setQuery] = useState('');
@@ -18,6 +20,7 @@ export default function Header() {
   const { totalItems } = useCart();
   const { categorias } = useCatalogo();
   const { tema } = useTheme();
+  const { usuario } = useAuth();
   const navigate = useNavigate();
 
   const usarLogoOscuro = tema === 'dark' && !logoOscuroError;
@@ -110,6 +113,7 @@ export default function Header() {
             <DepartamentoMenu />
             <div className="mx-1 h-6 w-px bg-gray-200 dark:bg-gray-700" />
             <AccountMenu />
+            {usuario && <NotificationBell />}
             <ThemeToggle />
             <Link
               to="/carrito"
@@ -134,6 +138,7 @@ export default function Header() {
             </Link>
             <DepartamentoMenu />
             <AccountMenu />
+            {usuario && <NotificationBell />}
             <ThemeToggle />
             <Link to="/carrito" className="relative rounded-full p-2 hover:bg-gray-100 dark:hover:bg-gray-800">
               <ShoppingCart size={22} />

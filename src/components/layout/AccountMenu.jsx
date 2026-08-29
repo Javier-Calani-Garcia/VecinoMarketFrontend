@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { User, LogOut, ChevronDown, Wallet, ClipboardList, Truck, MapPin, Receipt, Star, Tag, Users, MessageCircle, Radio, Bot } from 'lucide-react';
+import { User, LogOut, ChevronDown, Wallet, ClipboardList, Truck, MapPin, Receipt, Star, Tag, Users, MessageCircle, Radio, Bot, LayoutDashboard, Sparkles } from 'lucide-react';
 import Dropdown from '../ui/Dropdown';
 import AdminMenu from './AdminMenu';
 import { useAuth } from '../../context/AuthContext';
@@ -28,6 +28,9 @@ export default function AccountMenu() {
           <Link to="/perfil" className="block px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700">Mi perfil</Link>
           {esEmpresaOEmpleado(usuario) && (
             <>
+              <Link to="/mi-empresa/dashboard" className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700">
+                <LayoutDashboard size={16} /> Mi dashboard
+              </Link>
               <Link to="/mi-empresa/pedidos" className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700">
                 <ClipboardList size={16} /> Pedidos y ventas
               </Link>
@@ -62,6 +65,9 @@ export default function AccountMenu() {
           )}
           {esComprador(usuario) && (
             <>
+              <Link to="/recomendados" className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700">
+                <Sparkles size={16} /> Recomendado para ti
+              </Link>
               <Link to="/mis-direcciones" className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700">
                 <MapPin size={16} /> Mis direcciones
               </Link>
