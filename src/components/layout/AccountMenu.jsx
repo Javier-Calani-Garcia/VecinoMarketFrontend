@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { User, LogOut, ChevronDown, Wallet, ClipboardList, Truck, MapPin, Receipt } from 'lucide-react';
+import { User, LogOut, ChevronDown, Wallet, ClipboardList, Truck, MapPin, Receipt, Star, Tag, Users, MessageCircle, Radio, Bot } from 'lucide-react';
 import Dropdown from '../ui/Dropdown';
 import AdminMenu from './AdminMenu';
 import { useAuth } from '../../context/AuthContext';
@@ -40,6 +40,24 @@ export default function AccountMenu() {
               <Link to="/mi-empresa/facturas" className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700">
                 <Receipt size={16} /> Facturas
               </Link>
+              <Link to="/mi-empresa/reputacion" className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700">
+                <Star size={16} /> Reputación
+              </Link>
+              <Link to="/mi-empresa/promociones" className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700">
+                <Tag size={16} /> Promociones
+              </Link>
+              <Link to="/mi-empresa/referidos" className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700">
+                <Users size={16} /> Referidos
+              </Link>
+              <Link to="/mi-empresa/chat" className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700">
+                <MessageCircle size={16} /> Chat
+              </Link>
+              <Link to="/mi-empresa/lives" className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700">
+                <Radio size={16} /> Live commerce
+              </Link>
+              <Link to="/mi-empresa/chatbot" className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700">
+                <Bot size={16} /> Chatbot
+              </Link>
             </>
           )}
           {esComprador(usuario) && (
@@ -49,6 +67,15 @@ export default function AccountMenu() {
               </Link>
               <Link to="/mis-compras" className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700">
                 <Receipt size={16} /> Mis compras
+              </Link>
+              <Link to="/mis-resenas" className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700">
+                <Star size={16} /> Mis reseñas
+              </Link>
+              <Link to="/chat" className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700">
+                <MessageCircle size={16} /> Mis chats
+              </Link>
+              <Link to="/chatbot" className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700">
+                <Bot size={16} /> Chatbot de tiendas
               </Link>
             </>
           )}

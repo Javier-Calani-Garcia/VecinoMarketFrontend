@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ShoppingCart, Search, Menu as MenuIcon, X } from 'lucide-react';
+import { ShoppingCart, Search, Menu as MenuIcon, X, Radio } from 'lucide-react';
 import * as Icons from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { useCatalogo } from '../../context/CatalogoContext';
@@ -88,6 +88,13 @@ export default function Header() {
             <ExploreMenu />
           </div>
 
+          <Link
+            to="/live"
+            className="hidden md:flex shrink-0 items-center gap-1.5 rounded-full bg-red-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-red-700"
+          >
+            <Radio size={14} className="animate-pulse" /> LIVE
+          </Link>
+
           {/* Buscador: inline solo en desktop, en mobile pasa a su propia fila abajo */}
           <form
             onSubmit={buscar}
@@ -119,6 +126,12 @@ export default function Header() {
 
           {/* Íconos compactos: solo mobile */}
           <div className="flex md:hidden items-center shrink-0 text-gray-700 dark:text-gray-300">
+            <Link
+              to="/live"
+              className="flex items-center gap-1 rounded-full bg-red-600 px-2 py-1 text-[10px] font-bold text-white hover:bg-red-700 mr-1"
+            >
+              <Radio size={11} className="animate-pulse" /> LIVE
+            </Link>
             <DepartamentoMenu />
             <AccountMenu />
             <ThemeToggle />

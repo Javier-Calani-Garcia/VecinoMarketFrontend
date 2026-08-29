@@ -29,6 +29,22 @@ import MisDirecciones from './pages/MisDirecciones';
 import Facturacion from './pages/admin/Facturacion';
 import MisFacturas from './pages/empresa/MisFacturas';
 import MisCompras from './pages/MisCompras';
+import Reputacion from './pages/admin/Reputacion';
+import MiReputacion from './pages/empresa/MiReputacion';
+import MisResenas from './pages/MisResenas';
+import Promociones from './pages/admin/Promociones';
+import MisPromociones from './pages/empresa/MisPromociones';
+import Referidos from './pages/admin/Referidos';
+import MisReferidos from './pages/empresa/MisReferidos';
+import Chat from './pages/Chat';
+import MiChat from './pages/empresa/MiChat';
+import ChatAdmin from './pages/admin/ChatAdmin';
+import Live from './pages/Live';
+import MisLives from './pages/empresa/MisLives';
+import LivesAdmin from './pages/admin/LivesAdmin';
+import MisFaqsChatbot from './pages/empresa/MisFaqsChatbot';
+import ChatbotEmpresas from './pages/ChatbotEmpresas';
+import ChatbotAdmin from './pages/admin/ChatbotAdmin';
 import RolesBase from './pages/admin/RolesBase';
 import CambiarRoles from './pages/admin/CambiarRoles';
 import EnConstruccion from './pages/admin/EnConstruccion';
@@ -71,6 +87,22 @@ function App() {
         <Route path="/admin/facturacion" element={<Facturacion />} />
         <Route path="/mi-empresa/facturas" element={<MisFacturas />} />
         <Route path="/mis-compras" element={<MisCompras />} />
+        <Route path="/admin/reputacion" element={<Reputacion />} />
+        <Route path="/mi-empresa/reputacion" element={<MiReputacion />} />
+        <Route path="/mis-resenas" element={<MisResenas />} />
+        <Route path="/admin/promociones" element={<Promociones />} />
+        <Route path="/mi-empresa/promociones" element={<MisPromociones />} />
+        <Route path="/admin/referidos" element={<Referidos />} />
+        <Route path="/mi-empresa/referidos" element={<MisReferidos />} />
+        <Route path="/chat" element={<Chat />} />
+        <Route path="/mi-empresa/chat" element={<MiChat />} />
+        <Route path="/admin/chat" element={<ChatAdmin />} />
+        <Route path="/live" element={<Live />} />
+        <Route path="/mi-empresa/lives" element={<MisLives />} />
+        <Route path="/admin/live-commerce" element={<LivesAdmin />} />
+        <Route path="/mi-empresa/chatbot" element={<MisFaqsChatbot />} />
+        <Route path="/chatbot" element={<ChatbotEmpresas />} />
+        <Route path="/admin/chatbot" element={<ChatbotAdmin />} />
         <Route path="/admin/roles" element={<RolesBase />} />
         <Route path="/admin/cambiar-roles" element={<CambiarRoles />} />
         {rutasAdminPendientes.map((item) => (

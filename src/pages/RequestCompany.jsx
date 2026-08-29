@@ -1,12 +1,15 @@
 import { useState } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useSearchParams } from 'react-router-dom';
 import { CheckCircle2 } from 'lucide-react';
 import API from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 
 export default function RequestCompany() {
   const { usuario, cargando } = useAuth();
-  const [form, setForm] = useState({ razon_social: '', nit: '', documento_url: '' });
+  const [searchParams] = useSearchParams();
+  const [form, setForm] = useState({
+    razon_social: '', nit: '', documento_url: '', codigo_referido: searchParams.get('ref') || '',
+  });
   const [enviado, setEnviado] = useState(false);
   const [error, setError] = useState('');
   const [enviando, setEnviando] = useState(false);
@@ -80,6 +83,19 @@ export default function RequestCompany() {
             placeholder="https://..."
             className={inputClass}
           />
+        </div>
+        <div>
+          <label className={labelClass}>
+            Código de referido <span className="text-gray-400 dark:text-gray-500 font-normal">— opcional</span>
+          </label>
+          <input
+            name="codigo_referido" value={form.codigo_referido} onChange={onChange}
+            placeholder="Ej. ferreteria-san-pedro"
+            className={inputClass}
+          />
+          <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+            Si otra empresa de VecinoMarket te invitó, pon aquí su código para que reciba su beneficio.
+          </p>
         </div>
 
         {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
