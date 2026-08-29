@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Navigate } from 'react-router-dom';
-import { Radio, Plus, Trash2, Play, Square } from 'lucide-react';
+import { Navigate, useNavigate } from 'react-router-dom';
+import { Radio, Plus, Trash2, Play, Square, Film } from 'lucide-react';
 import API from '../../api/axios';
 import { useAuth } from '../../context/AuthContext';
 import { esEmpresaOEmpleado } from '../../utils/roles';
@@ -15,6 +15,7 @@ function badgeEstado(estado) {
 
 export default function MisLives() {
   const { usuario, cargando: cargandoAuth } = useAuth();
+  const navigate = useNavigate();
   const [lives, setLives] = useState([]);
   const [productos, setProductos] = useState([]);
   const [cargando, setCargando] = useState(true);
@@ -124,7 +125,7 @@ export default function MisLives() {
           <Plus size={16} /> Nueva transmisión
         </button>
       </div>
-      <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">CU17 · Vende tus productos en vivo. Pega el link de tu transmisión (YouTube, etc.) y márcala "En vivo" cuando empieces.</p>
+      <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">CU17 · Vende tus productos en vivo, transmitiendo con tu cámara directo desde VecinoMarket.</p>
 
       {error && <p className="text-sm text-red-600 dark:text-red-400 mb-4">{error}</p>}
 
@@ -141,6 +142,9 @@ export default function MisLives() {
                   <div className="flex items-center gap-2">
                     <span className="font-semibold text-gray-900 dark:text-gray-100">{l.titulo}</span>
                     <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${badgeEstado(l.estado)}`}>{l.estado}</span>
+                    {l.estado === 'EN_VIVO' && l.pausado && (
+                      <span className="rounded-full px-2 py-0.5 text-xs font-semibold bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300">PAUSADO</span>
+                    )}
                   </div>
                   <p className="text-xs text-gray-400 dark:text-gray-500 truncate">{l.url_stream}</p>
                   {l.productos_detalle.length > 0 && (
@@ -149,13 +153,23 @@ export default function MisLives() {
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   {l.estado !== 'EN_VIVO' && l.estado !== 'FINALIZADA' && (
-                    <button onClick={() => cambiarEstado(l, 'EN_VIVO')} title="Empezar transmisión" className="grid h-8 w-8 place-items-center rounded-full bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 hover:bg-red-100">
+                    <button onClick={() => navigate(`/mi-empresa/lives/${l.id}/transmitir`)} title="Empezar transmisión" className="grid h-8 w-8 place-items-center rounded-full bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 hover:bg-red-100">
+                      <Play size={14} />
+                    </button>
+                  )}
+                  {l.estado === 'EN_VIVO' && l.pausado && (
+                    <button onClick={() => navigate(`/mi-empresa/lives/${l.id}/transmitir`)} title="Reanudar transmisión" className="grid h-8 w-8 place-items-center rounded-full bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 hover:bg-red-100">
                       <Play size={14} />
                     </button>
                   )}
                   {l.estado === 'EN_VIVO' && (
-                    <button onClick={() => cambiarEstado(l, 'FINALIZADA')} title="Terminar transmisión" className="grid h-8 w-8 place-items-center rounded-full bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200">
+                    <button onClick={() => cambiarEstado(l, 'FINALIZADA')} title="Terminar transmisión (sin grabación — para grabarla, termínala desde la pantalla de transmisión)" className="grid h-8 w-8 place-items-center rounded-full bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200">
                       <Square size={14} />
+                    </button>
+                  )}
+                  {l.estado === 'FINALIZADA' && (
+                    <button onClick={() => navigate(`/mi-empresa/lives/${l.id}/grabacion`)} title="Ver grabación" className="grid h-8 w-8 place-items-center rounded-full bg-brand-50 dark:bg-brand-900/30 text-brand-700 dark:text-brand-400 hover:bg-brand-100">
+                      <Film size={14} />
                     </button>
                   )}
                   <button onClick={() => eliminar(l)} className="grid h-8 w-8 place-items-center rounded-full bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 hover:bg-red-100">
@@ -181,10 +195,9 @@ export default function MisLives() {
                 className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-300"
               />
               <input
-                required
                 value={form.url_stream}
                 onChange={(e) => setForm((prev) => ({ ...prev, url_stream: e.target.value }))}
-                placeholder="Link de tu transmisión (YouTube, etc.)"
+                placeholder="Link externo opcional (YouTube, etc.)"
                 className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-300"
               />
               <div>

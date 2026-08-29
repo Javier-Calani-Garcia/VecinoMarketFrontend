@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
-import { Receipt, ChevronDown, ChevronUp, Printer, Download } from 'lucide-react';
+import { Receipt, ChevronDown, ChevronUp, Download } from 'lucide-react';
 import API from '../../api/axios';
 import { useAuth } from '../../context/AuthContext';
 import { esEmpresaOEmpleado } from '../../utils/roles';
+import ExportarReporteMenu from '../../components/dashboard/ExportarReporteMenu';
 
 function badgeEstado(estado) {
   if (estado === 'PAGADA') return 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400';
@@ -147,12 +148,9 @@ export default function MisFacturas() {
                     ))}
                   </div>
                 )}
-                <button
-                  onClick={() => window.print()}
-                  className="flex items-center gap-1 text-brand-600 dark:text-brand-400 hover:text-brand-700 mt-2"
-                >
-                  <Printer size={12} /> Imprimir
-                </button>
+                <div className="mt-2">
+                  <ExportarReporteMenu url={`facturacion/mis-facturas/${f.id}/exportar/`} />
+                </div>
               </div>
             )}
           </div>

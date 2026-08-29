@@ -40,7 +40,10 @@ import Chat from './pages/Chat';
 import MiChat from './pages/empresa/MiChat';
 import ChatAdmin from './pages/admin/ChatAdmin';
 import Live from './pages/Live';
+import LiveViewer from './pages/LiveViewer';
 import MisLives from './pages/empresa/MisLives';
+import TransmitirLive from './pages/empresa/TransmitirLive';
+import GrabacionLive from './pages/empresa/GrabacionLive';
 import LivesAdmin from './pages/admin/LivesAdmin';
 import MisFaqsChatbot from './pages/empresa/MisFaqsChatbot';
 import ChatbotEmpresas from './pages/ChatbotEmpresas';
@@ -50,6 +53,9 @@ import CambiarRoles from './pages/admin/CambiarRoles';
 import ReportesEmpresaAdmin from './pages/admin/ReportesEmpresaAdmin';
 import DashboardAdmin from './pages/admin/DashboardAdmin';
 import DashboardEmpresa from './pages/empresa/DashboardEmpresa';
+import MisEmpleados from './pages/empresa/MisEmpleados';
+import MisProductos from './pages/empresa/MisProductos';
+import MiPerfilEmpresa from './pages/empresa/MiPerfilEmpresa';
 import PlanesAdmin from './pages/admin/PlanesAdmin';
 import Recomendaciones from './pages/Recomendaciones';
 import NotificacionesAdmin from './pages/admin/NotificacionesAdmin';
@@ -104,7 +110,10 @@ function App() {
         <Route path="/mi-empresa/chat" element={<MiChat />} />
         <Route path="/admin/chat" element={<ChatAdmin />} />
         <Route path="/live" element={<Live />} />
+        <Route path="/live/:id" element={<LiveViewer />} />
         <Route path="/mi-empresa/lives" element={<MisLives />} />
+        <Route path="/mi-empresa/lives/:id/transmitir" element={<TransmitirLive />} />
+        <Route path="/mi-empresa/lives/:id/grabacion" element={<GrabacionLive />} />
         <Route path="/admin/live-commerce" element={<LivesAdmin />} />
         <Route path="/mi-empresa/chatbot" element={<MisFaqsChatbot />} />
         <Route path="/chatbot" element={<ChatbotEmpresas />} />
@@ -114,6 +123,9 @@ function App() {
         <Route path="/admin/reportes-empresa" element={<ReportesEmpresaAdmin />} />
         <Route path="/admin/reportes-admin" element={<DashboardAdmin />} />
         <Route path="/mi-empresa/dashboard" element={<DashboardEmpresa />} />
+        <Route path="/mi-empresa/empleados" element={<MisEmpleados />} />
+        <Route path="/mi-empresa/productos" element={<MisProductos />} />
+        <Route path="/mi-empresa/perfil" element={<MiPerfilEmpresa />} />
         <Route path="/admin/planes" element={<PlanesAdmin />} />
         <Route path="/recomendados" element={<Recomendaciones />} />
         <Route path="/admin/notificaciones" element={<NotificacionesAdmin />} />

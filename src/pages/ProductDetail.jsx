@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link, Navigate } from 'react-router-dom';
-import { ShoppingCart, Minus, Plus, Store, Truck, ShieldCheck } from 'lucide-react';
+import { ShoppingCart, Minus, Plus, Store, Truck, ShieldCheck, Bot } from 'lucide-react';
 import { obtenerProducto } from '../api/catalogo';
 import { useCatalogo } from '../context/CatalogoContext';
 import StarRating from '../components/product/StarRating';
 import { useCart } from '../context/CartContext';
+import ChatbotWidget from '../components/chat/ChatbotWidget';
 
 export default function ProductDetail() {
   const { id } = useParams();
@@ -13,6 +14,7 @@ export default function ProductDetail() {
   const [cargando, setCargando] = useState(true);
   const [noEncontrado, setNoEncontrado] = useState(false);
   const [cantidad, setCantidad] = useState(1);
+  const [mostrarChatbot, setMostrarChatbot] = useState(false);
   const { agregarAlCarrito } = useCart();
 
   // Igual que en ProductListing: si cambia el id (navegar de un producto a
@@ -108,6 +110,21 @@ export default function ProductDetail() {
               <ShieldCheck size={18} className="text-brand-600" /> Compra protegida por VecinoMarket
             </div>
           </div>
+
+          {producto.empresaId && (
+            <div className="mt-6">
+              {mostrarChatbot ? (
+                <ChatbotWidget empresaId={producto.empresaId} empresaNombre={producto.empresa} />
+              ) : (
+                <button
+                  onClick={() => setMostrarChatbot(true)}
+                  className="flex items-center gap-2 rounded-full border border-gray-300 dark:border-gray-700 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
+                >
+                  <Bot size={16} className="text-brand-600 dark:text-brand-400" /> Preguntarle al chatbot de {producto.empresa}
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

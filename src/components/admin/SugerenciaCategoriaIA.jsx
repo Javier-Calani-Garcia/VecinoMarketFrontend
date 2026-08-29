@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Sparkles, Loader2 } from 'lucide-react';
 import API from '../../api/axios';
 
-export default function SugerenciaCategoriaIA({ productoId, tieneImagenes, onAplicar }) {
+export default function SugerenciaCategoriaIA({ productoId, tieneImagenes, onAplicar, url }) {
   const [cargando, setCargando] = useState(false);
   const [resultado, setResultado] = useState(null);
   const [error, setError] = useState('');
@@ -12,7 +12,7 @@ export default function SugerenciaCategoriaIA({ productoId, tieneImagenes, onApl
     setError('');
     setResultado(null);
     try {
-      const { data } = await API.post(`catalogo/admin/productos/${productoId}/sugerir-categoria/`);
+      const { data } = await API.post(url || `catalogo/admin/productos/${productoId}/sugerir-categoria/`);
       setResultado(data);
     } catch (err) {
       setError(err?.response?.data?.detail || 'No se pudo obtener una sugerencia.');

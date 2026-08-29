@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Radio, ExternalLink, Store } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Radio, PlayCircle, Store } from 'lucide-react';
 import API from '../api/axios';
 
 export default function Live() {
@@ -67,16 +68,12 @@ export default function Live() {
                   </div>
                 )}
 
-                {l.url_stream && (
-                  <a
-                    href={l.url_stream}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="flex items-center justify-center gap-1.5 rounded-full bg-red-600 py-2 text-sm font-semibold text-white hover:bg-red-700"
-                  >
-                    <ExternalLink size={14} /> Unirme al vivo
-                  </a>
-                )}
+                <Link
+                  to={`/live/${l.id}`}
+                  className="flex items-center justify-center gap-1.5 rounded-full bg-red-600 py-2 text-sm font-semibold text-white hover:bg-red-700"
+                >
+                  <PlayCircle size={14} /> Unirme al vivo
+                </Link>
               </div>
             </div>
           ))}

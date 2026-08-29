@@ -18,6 +18,7 @@ function adaptarProducto(p) {
     descripcion: p.descripcion || '',
     categoriaId: p.categoria ? String(p.categoria.id) : '',
     empresa: p.empresa?.razon_social || '',
+    empresaId: p.empresa?.id ?? null,
     precio: Number(p.precio),
     precio_descuento: p.precio_descuento != null ? Number(p.precio_descuento) : null,
     stock: p.stock ?? 0,

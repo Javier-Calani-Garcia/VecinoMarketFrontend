@@ -1,9 +1,9 @@
 import { Link } from 'react-router-dom';
-import { User, LogOut, ChevronDown, Wallet, ClipboardList, Truck, MapPin, Receipt, Star, Tag, Users, MessageCircle, Radio, Bot, LayoutDashboard, Sparkles } from 'lucide-react';
+import { User, LogOut, ChevronDown, Wallet, ClipboardList, Truck, MapPin, Receipt, Star, Tag, Users, MessageCircle, Radio, Bot, LayoutDashboard, Sparkles, UserCog, Building2, Boxes } from 'lucide-react';
 import Dropdown from '../ui/Dropdown';
 import AdminMenu from './AdminMenu';
 import { useAuth } from '../../context/AuthContext';
-import { esStaff, esEmpresaOEmpleado, esComprador } from '../../utils/roles';
+import { esStaff, esEmpresaOEmpleado, esEmpresa, esComprador } from '../../utils/roles';
 
 export default function AccountMenu() {
   const { usuario, logout } = useAuth();
@@ -30,6 +30,9 @@ export default function AccountMenu() {
             <>
               <Link to="/mi-empresa/dashboard" className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700">
                 <LayoutDashboard size={16} /> Mi dashboard
+              </Link>
+              <Link to="/mi-empresa/productos" className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700">
+                <Boxes size={16} /> Mis productos
               </Link>
               <Link to="/mi-empresa/pedidos" className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700">
                 <ClipboardList size={16} /> Pedidos y ventas
@@ -61,6 +64,16 @@ export default function AccountMenu() {
               <Link to="/mi-empresa/chatbot" className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700">
                 <Bot size={16} /> Chatbot
               </Link>
+              {esEmpresa(usuario) && (
+                <>
+                  <Link to="/mi-empresa/empleados" className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700">
+                    <UserCog size={16} /> Mis empleados
+                  </Link>
+                  <Link to="/mi-empresa/perfil" className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700">
+                    <Building2 size={16} /> Perfil de mi empresa
+                  </Link>
+                </>
+              )}
             </>
           )}
           {esComprador(usuario) && (

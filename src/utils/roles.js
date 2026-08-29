@@ -16,6 +16,13 @@ export function esEmpresaOEmpleado(usuario) {
   return !!usuario && (usuario.rol === 'EMPRESA' || usuario.rol === 'EMPLEADO');
 }
 
+// Solo el dueño de la empresa (no un empleado suyo) — para las secciones que
+// el backend restringe a EsEmpresa, como dar de alta empleados o editar el
+// perfil de la empresa.
+export function esEmpresa(usuario) {
+  return !!usuario && usuario.rol === 'EMPRESA';
+}
+
 export function esComprador(usuario) {
   return !!usuario && usuario.rol === 'COMPRADOR';
 }

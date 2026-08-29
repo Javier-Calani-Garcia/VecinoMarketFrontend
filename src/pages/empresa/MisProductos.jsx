@@ -3,7 +3,7 @@ import { Navigate } from 'react-router-dom';
 import { Boxes, Plus, Pencil, Trash2, Search, ChevronLeft, ChevronRight, X, ImagePlus, Upload } from 'lucide-react';
 import API from '../../api/axios';
 import { useAuth } from '../../context/AuthContext';
-import { esStaff } from '../../utils/roles';
+import { esEmpresaOEmpleado } from '../../utils/roles';
 import SugerenciaCategoriaIA from '../../components/admin/SugerenciaCategoriaIA';
 
 const ESTADOS = [
@@ -13,7 +13,7 @@ const ESTADOS = [
   { value: 'AGOTADO', label: 'Agotado' },
 ];
 
-const VACIO = { nombre: '', descripcion: '', sku: '', precio: '', precio_descuento: '', estado: 'ACTIVO', categoria: '', empresa: '' };
+const VACIO = { nombre: '', descripcion: '', sku: '', precio: '', precio_descuento: '', estado: 'ACTIVO', categoria: '' };
 
 function badgeEstado(estado) {
   if (estado === 'ACTIVO') return 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400';
@@ -21,18 +21,18 @@ function badgeEstado(estado) {
   return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300';
 }
 
-export default function Productos() {
+export default function MisProductos() {
   const { usuario, cargando: cargandoAuth } = useAuth();
   const [resultados, setResultados] = useState([]);
   const [total, setTotal] = useState(0);
   const [pagina, setPagina] = useState(1);
-  const [empresas, setEmpresas] = useState([]);
   const [categorias, setCategorias] = useState([]);
-  const [filtroEmpresa, setFiltroEmpresa] = useState('');
   const [filtroCategoria, setFiltroCategoria] = useState('');
   const [filtroEstado, setFiltroEstado] = useState('');
   const [q, setQ] = useState('');
   const [busqueda, setBusqueda] = useState('');
+  const [cargando, setCargando] = useState(true);
+  const [sinPermiso, setSinPermiso] = useState(false);
   const [error, setError] = useState('');
 
   const [mostrarForm, setMostrarForm] = useState(false);
@@ -47,38 +47,49 @@ export default function Productos() {
   const porPagina = 24;
 
   function cargarProductos() {
-    return API.get('catalogo/admin/productos/', {
-      params: {
-        page: pagina,
-        empresa: filtroEmpresa || undefined,
-        categoria: filtroCategoria || undefined,
-        estado: filtroEstado || undefined,
-        q: busqueda || undefined,
-      },
+    setCargando(true);
+    return API.get('catalogo/mis-productos/', {
+      params: { page: pagina, categoria: filtroCategoria || undefined, estado: filtroEstado || undefined, q: busqueda || undefined },
     })
       .then((res) => {
         setResultados(res.data.results);
         setTotal(res.data.count);
         setError('');
       })
-      .catch(() => setError('No se pudo cargar los productos.'));
+      .catch((err) => {
+        if (err?.response?.status === 403) setSinPermiso(true);
+        else setError('No se pudo cargar tus productos.');
+      })
+      .finally(() => setCargando(false));
   }
 
   useEffect(() => {
-    if (!usuario || !esStaff(usuario)) return;
+    if (!usuario || !esEmpresaOEmpleado(usuario)) return;
     cargarProductos();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [usuario, pagina, filtroEmpresa, filtroCategoria, filtroEstado, busqueda]);
+  }, [usuario, pagina, filtroCategoria, filtroEstado, busqueda]);
 
   useEffect(() => {
-    if (!usuario || !esStaff(usuario)) return;
-    API.get('usuarios/empresas/lista/', { params: { page_size: 100 } }).then((res) => setEmpresas(res.data.results)).catch(() => {});
-    API.get('catalogo/admin/categorias/').then((res) => setCategorias(res.data)).catch(() => {});
+    if (!usuario || !esEmpresaOEmpleado(usuario)) return;
+    API.get('catalogo/categorias/').then((res) => setCategorias(res.data)).catch(() => {});
   }, [usuario]);
 
   if (cargandoAuth) return null;
-  if (!usuario) return <Navigate to="/login?next=/admin/productos" replace />;
-  if (!esStaff(usuario)) return <Navigate to="/" replace />;
+  if (!usuario) return <Navigate to="/login?next=/mi-empresa/productos" replace />;
+  if (!esEmpresaOEmpleado(usuario)) return <Navigate to="/" replace />;
+
+  if (!cargando && sinPermiso) {
+    return (
+      <div className="mx-auto max-w-2xl px-4 py-16 text-center">
+        <Boxes className="mx-auto mb-3 text-gray-300 dark:text-gray-600" size={40} />
+        <h1 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">Sin acceso</h1>
+        <p className="text-sm text-gray-500 dark:text-gray-400">
+          No tienes el permiso "gestionar_productos" para publicar productos de tu empresa.
+          Pídele al dueño de la cuenta que te lo asigne.
+        </p>
+      </div>
+    );
+  }
 
   function buscar(e) {
     e.preventDefault();
@@ -105,7 +116,6 @@ export default function Productos() {
       precio_descuento: p.precio_descuento ?? '',
       estado: p.estado,
       categoria: p.categoria ?? '',
-      empresa: p.empresa,
     });
     setErrorForm('');
     setNuevaImagenUrl('');
@@ -124,20 +134,21 @@ export default function Productos() {
     };
     try {
       if (editando) {
-        await API.patch(`catalogo/admin/productos/${editando.id}/`, payload);
+        await API.patch(`catalogo/mis-productos/${editando.id}/`, payload);
         setMostrarForm(false);
       } else {
         // En vez de cerrar el modal, seguimos editando el producto recién
         // creado — así se puede agregar imágenes (y pedir la sugerencia de
-        // categoría por IA, que necesita una imagen) sin abrirlo aparte.
-        const { data } = await API.post('catalogo/admin/productos/', payload);
+        // categoría por IA, que necesita una imagen) sin tener que volver
+        // a abrirlo aparte.
+        const { data } = await API.post('catalogo/mis-productos/', payload);
         setEditando(data);
         setRecienCreado(true);
       }
       await cargarProductos();
     } catch (err) {
       const data = err?.response?.data || {};
-      setErrorForm(data.precio_descuento?.[0] || data.empresa?.[0] || data.nombre?.[0] || 'No se pudo guardar el producto.');
+      setErrorForm(data.precio_descuento?.[0] || data.nombre?.[0] || 'No se pudo guardar el producto.');
     } finally {
       setGuardando(false);
     }
@@ -146,7 +157,7 @@ export default function Productos() {
   async function eliminar(p) {
     if (!window.confirm(`¿Eliminar el producto "${p.nombre}"?`)) return;
     try {
-      await API.delete(`catalogo/admin/productos/${p.id}/`);
+      await API.delete(`catalogo/mis-productos/${p.id}/`);
       await cargarProductos();
     } catch {
       setError('No se pudo eliminar el producto.');
@@ -156,7 +167,7 @@ export default function Productos() {
   async function agregarImagen() {
     if (!nuevaImagenUrl.trim() || !editando) return;
     try {
-      const { data } = await API.post(`catalogo/admin/productos/${editando.id}/imagenes/`, { url: nuevaImagenUrl.trim() });
+      const { data } = await API.post(`catalogo/mis-productos/${editando.id}/imagenes/`, { url: nuevaImagenUrl.trim() });
       setEditando((prev) => ({ ...prev, imagenes: [...prev.imagenes, data] }));
       setNuevaImagenUrl('');
     } catch {
@@ -173,7 +184,7 @@ export default function Productos() {
     const formData = new FormData();
     formData.append('archivo', archivo);
     try {
-      const { data } = await API.post(`catalogo/admin/productos/${editando.id}/imagenes/`, formData, {
+      const { data } = await API.post(`catalogo/mis-productos/${editando.id}/imagenes/`, formData, {
         headers: { 'Content-Type': undefined },
       });
       setEditando((prev) => ({ ...prev, imagenes: [...prev.imagenes, data] }));
@@ -187,7 +198,7 @@ export default function Productos() {
   async function quitarImagen(imagenId) {
     if (!editando) return;
     try {
-      await API.delete(`catalogo/admin/productos/${editando.id}/imagenes/${imagenId}/`);
+      await API.delete(`catalogo/mis-productos/${editando.id}/imagenes/${imagenId}/`);
       setEditando((prev) => ({ ...prev, imagenes: prev.imagenes.filter((im) => im.id !== imagenId) }));
     } catch {
       setErrorForm('No se pudo quitar la imagen.');
@@ -201,7 +212,7 @@ export default function Productos() {
       <div className="flex items-center justify-between gap-2 mb-1">
         <div className="flex items-center gap-2">
           <Boxes className="text-brand-600 dark:text-brand-400" size={24} />
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Gestión de productos</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Mis productos</h1>
         </div>
         <button
           onClick={abrirNuevo}
@@ -210,11 +221,8 @@ export default function Productos() {
           <Plus size={16} /> Nuevo producto
         </button>
       </div>
-      <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">
-        CU07 · Productos de todas las empresas, cualquiera sea su estado.
-      </p>
-      <p className="text-xs text-gray-400 dark:text-gray-500 mb-6">
-        + CU08 · Categorizar Producto mediante Visión Artificial (al editar un producto con imagen)
+      <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+        CU07 · Publica y administra los productos de tu empresa en el catálogo.
       </p>
 
       <div className="flex flex-wrap items-center gap-3 mb-4">
@@ -229,14 +237,6 @@ export default function Productos() {
             <Search size={16} />
           </button>
         </form>
-        <select
-          value={filtroEmpresa}
-          onChange={(e) => { setFiltroEmpresa(e.target.value); setPagina(1); }}
-          className="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-300"
-        >
-          <option value="">Todas las empresas</option>
-          {empresas.map((e) => <option key={e.id} value={e.id}>{e.razon_social}</option>)}
-        </select>
         <select
           value={filtroCategoria}
           onChange={(e) => { setFiltroCategoria(e.target.value); setPagina(1); }}
@@ -261,7 +261,6 @@ export default function Productos() {
           <thead className="bg-gray-50 dark:bg-gray-900 text-left text-gray-500 dark:text-gray-400">
             <tr>
               <th className="px-4 py-3 font-medium">Producto</th>
-              <th className="px-4 py-3 font-medium">Empresa</th>
               <th className="px-4 py-3 font-medium">Categoría</th>
               <th className="px-4 py-3 font-medium">Precio</th>
               <th className="px-4 py-3 font-medium">Stock</th>
@@ -270,15 +269,16 @@ export default function Productos() {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100 dark:divide-gray-800 bg-white dark:bg-gray-900">
-            {resultados.length === 0 ? (
-              <tr><td colSpan={7} className="px-4 py-8 text-center text-gray-400 dark:text-gray-500">Sin resultados.</td></tr>
+            {cargando ? (
+              <tr><td colSpan={6} className="px-4 py-8 text-center text-gray-400 dark:text-gray-500">Cargando...</td></tr>
+            ) : resultados.length === 0 ? (
+              <tr><td colSpan={6} className="px-4 py-8 text-center text-gray-400 dark:text-gray-500">Todavía no publicaste productos.</td></tr>
             ) : resultados.map((p) => (
               <tr key={p.id}>
                 <td className="px-4 py-3">
                   <div className="text-gray-800 dark:text-gray-200 font-medium">{p.nombre}</div>
                   {p.sku && <div className="text-xs text-gray-400 dark:text-gray-500">SKU {p.sku}</div>}
                 </td>
-                <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{p.empresa_nombre}</td>
                 <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{p.categoria_nombre || '—'}</td>
                 <td className="px-4 py-3">
                   {p.precio_descuento ? (
@@ -339,12 +339,12 @@ export default function Productos() {
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
-              {recienCreado ? 'Producto creado' : editando ? 'Editar producto' : 'Nuevo producto'}
+              {recienCreado ? 'Producto publicado' : editando ? 'Editar producto' : 'Nuevo producto'}
             </h2>
             <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
               {recienCreado
-                ? 'Ahora se le pueden agregar fotos — con al menos una se puede pedir la sugerencia de categoría con IA.'
-                : !editando && 'Completa estos datos primero; al guardarlo se van a poder agregar fotos y pedir la sugerencia de categoría con IA.'}
+                ? 'Ahora agrégale fotos — con al menos una puedes pedirle a la IA que te sugiera la categoría.'
+                : !editando && 'Completa estos datos primero; al publicarlo vas a poder agregarle fotos y pedir la sugerencia de categoría con IA.'}
             </p>
 
             <div className="space-y-3">
@@ -362,31 +362,21 @@ export default function Productos() {
                 rows={2}
                 className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-300"
               />
-              <div className="grid grid-cols-2 gap-2">
-                <select
-                  required
-                  value={form.empresa}
-                  onChange={(e) => setForm((prev) => ({ ...prev, empresa: e.target.value }))}
-                  className="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-300"
-                >
-                  <option value="">Empresa...</option>
-                  {empresas.map((e) => <option key={e.id} value={e.id}>{e.razon_social}</option>)}
-                </select>
-                <select
-                  value={form.categoria}
-                  onChange={(e) => setForm((prev) => ({ ...prev, categoria: e.target.value }))}
-                  className="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-300"
-                >
-                  <option value="">Sin categoría</option>
-                  {categorias.map((c) => <option key={c.id} value={c.id}>{c.nombre}</option>)}
-                </select>
-              </div>
+              <select
+                value={form.categoria}
+                onChange={(e) => setForm((prev) => ({ ...prev, categoria: e.target.value }))}
+                className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-300"
+              >
+                <option value="">Sin categoría</option>
+                {categorias.map((c) => <option key={c.id} value={c.id}>{c.nombre}</option>)}
+              </select>
 
               {editando && (
                 <SugerenciaCategoriaIA
                   productoId={editando.id}
                   tieneImagenes={editando.imagenes.length > 0}
                   onAplicar={(categoriaId) => setForm((prev) => ({ ...prev, categoria: categoriaId }))}
+                  url={`catalogo/mis-productos/${editando.id}/sugerir-categoria/`}
                 />
               )}
 
@@ -481,7 +471,7 @@ export default function Productos() {
                 disabled={guardando}
                 className="flex-1 rounded-md bg-brand-600 px-3 py-2 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-60"
               >
-                {guardando ? 'Guardando...' : editando ? 'Guardar cambios' : 'Crear producto'}
+                {guardando ? 'Guardando...' : editando ? 'Guardar cambios' : 'Publicar producto'}
               </button>
             </div>
           </form>
